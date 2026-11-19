@@ -1,9 +1,6 @@
+2 8 keyboard 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 0 0 285 0
 2 12 platonic_lut 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 262144 0 1579 0
-1 17 platonic_renderer 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 262144 0 2201 0
-2 11 vga_convert 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 0 0 87 0
-2 11 vga_adapter 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 131072 0 164 0
-1 17 platonic_renderer 7 fast__1 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 262144 0 2201 0
-1 17 platonic_renderer 7 fast__2 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 262144 0 2201 0
-1 17 platonic_renderer 7 fast__3 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 262144 0 2201 0
-1 17 platonic_renderer 7 fast__4 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 262144 0 2201 0
-1 20 tb_platonic_renderer 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 2146304 0 12265 0
+2 17 platonic_renderer 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 393216 0 2238 0
+2 17 vga_board_adapter 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 0 0 366 0
+2 3 top 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 393216 0 2993 0
+1 13 tb_fpga_board 4 fast 65 C:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim/work 0 0 573440 0 3179 0

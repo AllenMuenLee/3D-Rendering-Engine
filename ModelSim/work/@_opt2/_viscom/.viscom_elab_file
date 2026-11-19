@@ -1,1 +1,1 @@
-C:/altera_standard/25.1std/questa_fse/win64/VisualizerRls/bin/viscom.exe -nolock -quiet -jmem_size 541104 3D_Rendering_Engine/ModelSim/work.testbench_vga -quiet -auto_acc_if_foreign -work 3D_Rendering_Engine/ModelSim/work -allow_unnamed -o _opt2 -id 1-6c2f8026cebf-6aff0e38-246-1c8c
+C:/altera_standard/25.1std/questa_fse/win64/VisualizerRls/bin/viscom.exe -nolock -quiet -jmem_size 786432 3D_Rendering_Engine/ModelSim/work.tb_top_vga -quiet -auto_acc_if_foreign -work 3D_Rendering_Engine/ModelSim/work -allow_unnamed -o _opt2 -id 1-6c2f8026cebf-6aff172b-1c9-97d4

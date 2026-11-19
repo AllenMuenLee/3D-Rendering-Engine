@@ -4,4 +4,4 @@ if exist work rmdir /S /Q work
 
 vlib work
 vlog ../tb/*.v
-vlog %SOURCE_FILES%
+vlog +define+DESIM %SOURCE_FILES%

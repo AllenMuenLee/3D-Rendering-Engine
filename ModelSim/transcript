@@ -1,37 +1,3 @@
-# vlib work
-# ** Warning: (vlib-34) Library already exists at "work".
-# Errors: 0, Warnings: 1
-#  vlog ../top.v ../keyboard_v2.v ../vga_adapter/*.v ../tb/PS2_keyboard.v testbench_v2.v
-# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
-# Start time: 09:50:05 on Nov 19,2026
-# vlog ../top.v ../keyboard_v2.v ../vga_adapter/vga_adapter.v ../vga_adapter/vga_address_translator.v ../vga_adapter/vga_controller.v ../tb/PS2_keyboard.v testbench_v2.v 
-# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# -- Compiling module top
-# -- Compiling module keyboard
-# -- Compiling module vga_adapter
-# -- Compiling module vga_ff
-# -- Compiling module vga_convert
-# -- Compiling module vga_address_translator
-# -- Compiling module vga_controller
-# -- Compiling module PS2_keyboard
-# -- Compiling module ps2_clk_dat
-# -- Compiling module testbench_v2
-# 
-# Top level modules:
-# 	vga_ff
-# 	vga_controller
-# 	testbench_v2
-# End time: 09:50:05 on Nov 19,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-#  vsim -voptargs=+acc work.testbench_v2 -Lf 220model -Lf altera_mf_ver -Lf verilog
-# ** Note: (vsim-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# vsim -voptargs="+acc" work.testbench_v2 -Lf 220model -Lf altera_mf_ver -Lf verilog 
-# Start time: 09:50:05 on Nov 19,2026
-# ** Note: (vsim-3812) Design is being optimized...
-# ** Warning: (vopt-10908) Some optimizations are turned off because the +acc switch is in effect.
-# ** Note: (vopt-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# ** Note: (vopt-143) Recognized 1 FSM in module "PS2_keyboard(fast)".
-# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # //  Questa Altera Starter FPGA Edition-64
 # //  Version 2025.2 win64 May 31 2025
 # //
@@ -46,14 +12,67 @@
 # // of the Customer's facilities without the express written permission of SISW,
 # // and may not be used in any way not expressly authorized by SISW.
 # //
+# do testbench_v2.tcl
+# ** Warning: (vlib-34) Library already exists at "work".
+# Errors: 0, Warnings: 1
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 10:16:19 on Nov 19,2026
+# vlog -reportprogress 300 ../top.v ../keyboard_v2.v ../platonic_lut.v ../platonic_renderer.v ../vga_adapter/vga_adapter.v ../vga_adapter/vga_address_translator.v ../vga_adapter/vga_controller.v 
+# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
+# -- Compiling module top
+# -- Compiling module keyboard
+# -- Compiling module platonic_lut
+# -- Compiling module platonic_renderer
+# -- Compiling module vga_adapter
+# -- Compiling module vga_ff
+# -- Compiling module vga_convert
+# -- Compiling module vga_address_translator
+# -- Compiling module vga_controller
+# 
+# Top level modules:
+# 	top
+# 	vga_ff
+# 	vga_controller
+# End time: 10:16:20 on Nov 19,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 10:16:20 on Nov 19,2026
+# vlog -reportprogress 300 ../tb/PS2_keyboard.v 
+# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
+# -- Compiling module PS2_keyboard
+# -- Compiling module ps2_clk_dat
+# 
+# Top level modules:
+# 	PS2_keyboard
+# End time: 10:16:20 on Nov 19,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 10:16:20 on Nov 19,2026
+# vlog -reportprogress 300 testbench_v2.v 
+# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
+# -- Compiling module testbench_v2
+# 
+# Top level modules:
+# 	testbench_v2
+# End time: 10:16:20 on Nov 19,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# ** Note: (vsim-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
+# vsim -voptargs="+acc" work.testbench_v2 -Lf 220model -Lf altera_mf_ver -Lf verilog 
+# Start time: 10:16:21 on Nov 19,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: (vopt-10908) Some optimizations are turned off because the +acc switch is in effect.
+# ** Note: (vopt-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
+# ** Note: (vopt-143) Recognized 1 FSM in module "PS2_keyboard(fast)".
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
 # Loading work.testbench_v2(fast)
 # Loading work.top(fast)
 # Loading work.keyboard(fast)
+# Loading work.platonic_renderer(fast)
+# Loading work.platonic_lut(fast)
 # Loading work.vga_adapter(fast)
 # Loading work.vga_convert(fast)
 # Loading work.PS2_keyboard(fast)
 # Loading work.ps2_clk_dat(fast)
-#  run 35000 ns
 # PASS Press W -> LEDR[3:0]=1000 (W=1 A=0 S=0 D=0)
 # PASS Hold W + Press D -> LEDR[3:0]=1001 (W=1 A=0 S=0 D=1)
 # PASS Hold W,D + A -> LEDR[3:0]=1101 (W=1 A=1 S=0 D=1)
@@ -65,6 +84,5 @@
 # PASS Release A -> LEDR[3:0]=0001 (W=0 A=0 S=0 D=1)
 # PASS Release D -> LEDR[3:0]=0000 (W=0 A=0 S=0 D=0)
 # ALL MULTI-KEY TESTS PASSED
-#  quit -f
-# End time: 09:50:09 on Nov 19,2026, Elapsed time: 0:00:04
+# End time: 10:26:32 on Nov 19,2026, Elapsed time: 0:10:11
 # Errors: 0, Warnings: 1

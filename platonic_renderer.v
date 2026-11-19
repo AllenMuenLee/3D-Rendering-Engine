@@ -1,15 +1,14 @@
 `default_nettype none
 
-/*  Behavioral 3D Platonic Solid Renderer (VGA - 640x480)
- *  Uses explicit Verilog for-loops to iterate through all triangles of the
- *  selected Platonic solid (SHAPE_ID), culls faces whose normal vector Y
- *  points inward, projects vertices directly as (x = vx, z = vz, ignoring vy),
- *  loops from the left-bottom to the top-right of each triangle's bounding box,
- *  checks point-in-triangle via 2D edge functions, and writes matching pixels
- *  through vga_adapter.
+/*  Synthesizable 3D Platonic Solid Renderer (VGA - 640x480)
+ *  Iterates through all triangles of the selected Platonic solid (SHAPE_ID),
+ *  culls faces whose normal vector Y points inward, projects vertices directly
+ *  as (x = vx, z = vz, ignoring vy), scans from the left-bottom to the
+ *  top-right of each triangle's bounding box, checks point-in-triangle via 2D
+ *  edge functions, and writes matching pixels through vga_adapter.
  *
- *  Note: Written with behavioral for-loops and @(posedge clk) for DESim /
- *  ModelSim simulation; an FSM is required if targeting Quartus synthesis.
+ *  Note: Uses a clocked FSM (always @(posedge clk)) rather than behavioral
+ *  for-loops with @(posedge clk) so Quartus can elaborate and synthesize it.
  *
  *  SHAPE_ID encoding:
  *    3'd0 : Tetrahedron  ( 4 verts,  4 tris,  4 face groups)
@@ -42,6 +41,22 @@ module platonic_renderer #(
     localparam signed [15:0] OBJ_SCALE = 16'sd180;
     localparam signed [11:0] MAX_X_LIM = 12'sd639;
     localparam signed [11:0] MAX_Z_LIM = 12'sd479;
+
+    // -------------------------------------------------------------------------
+    // Custom Rasterizer FSM States (not from vga_adapter)
+    // -------------------------------------------------------------------------
+    localparam [3:0]
+        S_IDLE       = 4'd0,  // Wait for vga_sync from vga_adapter before drawing
+        S_CHECK_TRI  = 4'd1,  // Check face normal Y and cull inward-facing triangles
+        S_LOAD_V0    = 4'd2,  // Latch projected (x0, z0) for vertex 0
+        S_LOAD_V1    = 4'd3,  // Latch projected (x1, z1) for vertex 1
+        S_LOAD_V2    = 4'd4,  // Latch projected (x2, z2) for vertex 2
+        S_SETUP_BBOX = 4'd5,  // Compute clamped triangle bounding box; start at left-bottom
+        S_RASTER     = 4'd6,  // Scan left-bottom -> top-right and test point-in-triangle
+        S_NEXT_TRI   = 4'd7,  // Advance to next triangle in the LUT
+        S_DONE       = 4'd8;  // All triangles processed; hold done high
+
+    reg [3:0] state;
 
     // -------------------------------------------------------------------------
     // Custom Geometry & Normal LUT Instantiation (platonic_lut, not vga_adapter)
@@ -79,7 +94,7 @@ module platonic_renderer #(
     // Custom 2D Projection (x = vx, z = vz, ignore vy), Culling & Edge Test
     // (not from vga_adapter)
     // -------------------------------------------------------------------------
-    reg [4:0]         cur_face_group;
+    reg [4:0]         cur_v1_idx, cur_v2_idx, cur_face_group;
     reg signed [11:0] x0, z0, x1, z1, x2, z2;
     reg signed [11:0] bbox_min_x, bbox_max_x;
     reg signed [11:0] bbox_min_z, bbox_max_z;
@@ -163,85 +178,138 @@ module platonic_renderer #(
                              {palette_rgb9[8],   palette_rgb9[5],   palette_rgb9[2]};
 
     // -------------------------------------------------------------------------
-    // Custom For-Loop Rasterizer (not from vga_adapter)
+    // Custom Synthesizable Rasterizer FSM (not from vga_adapter)
     // -------------------------------------------------------------------------
-    integer t, px, pz;
-
-    always begin : RENDER_LOOP
-        if (resetn !== 1'b1) begin
+    always @(posedge clk) begin
+        if (!resetn) begin
+            state          <= S_IDLE;
+            lut_vert_addr  <= 5'd0;
+            tri_idx        <= 6'd0;
+            cur_v1_idx     <= 5'd0;
+            cur_v2_idx     <= 5'd0;
+            cur_face_group <= 5'd0;
+            x0             <= 12'sd0;
+            z0             <= 12'sd0;
+            x1             <= 12'sd0;
+            z1             <= 12'sd0;
+            x2             <= 12'sd0;
+            z2             <= 12'sd0;
+            bbox_min_x     <= 12'sd0;
+            bbox_max_x     <= 12'sd0;
+            bbox_min_z     <= 12'sd0;
+            bbox_max_z     <= 12'sd0;
+            scan_x         <= 12'sd0;
+            scan_z         <= 12'sd0;
             vga_x          <= 10'd0;
             vga_y          <= 9'd0;
             vga_color      <= {COLOR_DEPTH{1'b0}};
             vga_write      <= 1'b0;
             done           <= 1'b0;
-            lut_vert_addr  = 5'd0;
-            tri_idx        = 6'd0;
-            cur_face_group = 5'd0;
-            x0 = 12'sd0; z0 = 12'sd0;
-            x1 = 12'sd0; z1 = 12'sd0;
-            x2 = 12'sd0; z2 = 12'sd0;
-            bbox_min_x = 12'sd0; bbox_max_x = 12'sd0;
-            bbox_min_z = 12'sd0; bbox_max_z = 12'sd0;
-            scan_x = 12'sd0; scan_z = 12'sd0;
-            wait (resetn === 1'b1);
-        end
-
-        @(posedge clk);
-        vga_write <= 1'b0;
-        done      <= 1'b0;
-
-        // Wait until vga_adapter signals drawing mode (vga_sync == 1)
-        while (!vga_sync && (resetn === 1'b1))
-            @(posedge clk);
-
-        // Loop through every triangle of the selected shape
-        for (t = 0; (t < num_tris) && (resetn === 1'b1); t = t + 1) begin
-            tri_idx = t[5:0];
-            #0; // Settle combinational LUT triangle & face normal outputs
-
-            // Skip triangles whose face normal Y points inward
-            if (!normal_inward) begin
-                cur_face_group = tri_face_group;
-
-                // Project triangle vertices directly: x = vx, z = vz, ignore vy
-                lut_vert_addr = tri_v0; #0; x0 = proj_x; z0 = proj_z;
-                lut_vert_addr = tri_v1; #0; x1 = proj_x; z1 = proj_z;
-                lut_vert_addr = tri_v2; #0; x2 = proj_x; z2 = proj_z;
-                #0; // Settle bounding box and area2
-
-                if ((area2 != 24'sd0) &&
-                    (max_x_unclamped >= 12'sd0) && (min_x_unclamped <= MAX_X_LIM) &&
-                    (max_z_unclamped >= 12'sd0) && (min_z_unclamped <= MAX_Z_LIM)) begin
-                    bbox_min_x = min_x_clamped;
-                    bbox_max_x = max_x_clamped;
-                    bbox_min_z = min_z_clamped;
-                    bbox_max_z = max_z_clamped;
-
-                    // Loop from left-bottom (bbox_min_x, bbox_max_z) to top-right (bbox_max_x, bbox_min_z)
-                    for (pz = bbox_max_z; (pz >= bbox_min_z) && (resetn === 1'b1); pz = pz - 1) begin
-                        for (px = bbox_min_x; (px <= bbox_max_x) && (resetn === 1'b1); px = px + 1) begin
-                            scan_x = px[11:0];
-                            scan_z = pz[11:0];
-                            #0; // Settle edge-function check for (scan_x, scan_z)
-                            if (inside_tri) begin
-                                vga_x     <= scan_x[9:0];
-                                vga_y     <= scan_z[8:0];
-                                vga_color <= face_color;
-                                vga_write <= 1'b1;
-                            end else begin
-                                vga_write <= 1'b0;
-                            end
-                            @(posedge clk);
-                        end
+        end else begin
+            case (state)
+                S_IDLE: begin
+                    vga_write <= 1'b0;
+                    done      <= 1'b0;
+                    tri_idx   <= 6'd0;
+                    if (vga_sync) begin
+                        if (num_tris == 6'd0)
+                            state <= S_DONE;
+                        else
+                            state <= S_CHECK_TRI;
                     end
                 end
-            end
-        end
 
-        vga_write <= 1'b0;
-        if (resetn === 1'b1) begin
-            done <= 1'b1;
-            wait (resetn === 1'b0);
+                S_CHECK_TRI: begin
+                    vga_write <= 1'b0;
+                    if (normal_inward) begin
+                        state <= S_NEXT_TRI;
+                    end else begin
+                        cur_v1_idx     <= tri_v1;
+                        cur_v2_idx     <= tri_v2;
+                        cur_face_group <= tri_face_group;
+                        lut_vert_addr  <= tri_v0;
+                        state          <= S_LOAD_V0;
+                    end
+                end
+
+                S_LOAD_V0: begin
+                    x0            <= proj_x;
+                    z0            <= proj_z;
+                    lut_vert_addr <= cur_v1_idx;
+                    state         <= S_LOAD_V1;
+                end
+
+                S_LOAD_V1: begin
+                    x1            <= proj_x;
+                    z1            <= proj_z;
+                    lut_vert_addr <= cur_v2_idx;
+                    state         <= S_LOAD_V2;
+                end
+
+                S_LOAD_V2: begin
+                    x2    <= proj_x;
+                    z2    <= proj_z;
+                    state <= S_SETUP_BBOX;
+                end
+
+                S_SETUP_BBOX: begin
+                    if ((area2 == 24'sd0) ||
+                        (max_x_unclamped < 12'sd0) || (min_x_unclamped > MAX_X_LIM) ||
+                        (max_z_unclamped < 12'sd0) || (min_z_unclamped > MAX_Z_LIM)) begin
+                        state <= S_NEXT_TRI;
+                    end else begin
+                        bbox_min_x <= min_x_clamped;
+                        bbox_max_x <= max_x_clamped;
+                        bbox_min_z <= min_z_clamped;
+                        bbox_max_z <= max_z_clamped;
+                        // Start at left-bottom: (min_x, max_z)
+                        scan_x     <= min_x_clamped;
+                        scan_z     <= max_z_clamped;
+                        state      <= S_RASTER;
+                    end
+                end
+
+                S_RASTER: begin
+                    if (inside_tri) begin
+                        vga_x     <= scan_x[9:0];
+                        vga_y     <= scan_z[8:0];
+                        vga_color <= face_color;
+                        vga_write <= 1'b1;
+                    end else begin
+                        vga_write <= 1'b0;
+                    end
+
+                    // Scan left -> right, bottom -> top up to top-right (max_x, min_z)
+                    if (scan_x < bbox_max_x) begin
+                        scan_x <= scan_x + 12'sd1;
+                    end else if (scan_z > bbox_min_z) begin
+                        scan_x <= bbox_min_x;
+                        scan_z <= scan_z - 12'sd1;
+                    end else begin
+                        state <= S_NEXT_TRI;
+                    end
+                end
+
+                S_NEXT_TRI: begin
+                    vga_write <= 1'b0;
+                    if (tri_idx + 6'd1 < num_tris) begin
+                        tri_idx <= tri_idx + 6'd1;
+                        state   <= S_CHECK_TRI;
+                    end else begin
+                        state <= S_DONE;
+                    end
+                end
+
+                S_DONE: begin
+                    vga_write <= 1'b0;
+                    done      <= 1'b1;
+                end
+
+                default: begin
+                    vga_write <= 1'b0;
+                    state     <= S_IDLE;
+                end
+            endcase
         end
     end
 

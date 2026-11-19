@@ -1,11 +1,32 @@
 `default_nettype none
 
-// Uncomment to enable background MIF initialization via VideoMemory (altsyncram)
-// `define VGA_MEMORY
+// Uncomment to build for DESim simulation instead of a physical FPGA board:
+// `define DESIM
 
-module top (CLOCK_50, KEY, LEDR, PS2_CLK, PS2_DAT, VGA_X, VGA_Y, VGA_COLOR, plot);
+module top (
+    CLOCK_50,
+    KEY,
+    LEDR,
+    PS2_CLK,
+    PS2_DAT,
+`ifdef DESIM
+    VGA_X,
+    VGA_Y,
+    VGA_COLOR,
+    plot
+`else
+    VGA_R,
+    VGA_G,
+    VGA_B,
+    VGA_HS,
+    VGA_VS,
+    VGA_BLANK_N,
+    VGA_SYNC_N,
+    VGA_CLK
+`endif
+);
 
-    // --- Existing vga_adapter resolution & color settings (hardcoded to 640x480) ---
+    // --- Screen & color settings (hardcoded to 640x480) ---
     localparam RESOLUTION       = "640x480";
     localparam nX               = 10;
     localparam nY               = 9;
@@ -15,17 +36,28 @@ module top (CLOCK_50, KEY, LEDR, PS2_CLK, PS2_DAT, VGA_X, VGA_Y, VGA_COLOR, plot
     parameter [2:0] SHAPE_ID    = 3'd2;      // 0:Tetra, 1:Octa, 2:Cube, 3:Icosa, 4:Dodeca
     parameter CULL_INWARD_NEG_Y = 1;         // 1: cull faces with ny <= 0, 0: cull ny >= 0
 
-    input wire CLOCK_50;            // DE-series 50 MHz clock signal
-    input wire [3:0] KEY;           // DE-series pushbuttons
+    input  wire       CLOCK_50;              // DE-series 50 MHz clock signal
+    input  wire [3:0] KEY;                   // DE-series pushbuttons (active-low)
 
-    output wire [9:0] LEDR;         // DE-series LEDs
-    inout  wire PS2_CLK;            // DE-series PS/2 Clock
-    inout  wire PS2_DAT;            // DE-series PS/2 Data
+    output wire [9:0] LEDR;                  // DE-series LEDs
+    inout  wire       PS2_CLK;               // DE-series PS/2 Clock
+    inout  wire       PS2_DAT;               // DE-series PS/2 Data
 
-    output wire [9:0] VGA_X;        // DESim VGA X coordinate
-    output wire [8:0] VGA_Y;        // DESim VGA Y coordinate
-    output wire [23:0] VGA_COLOR;   // DESim VGA 24-bit RGB color
-    output wire plot;               // DESim VGA pixel write strobe
+`ifdef DESIM
+    output wire [9:0]  VGA_X;                // DESim VGA X coordinate
+    output wire [8:0]  VGA_Y;                // DESim VGA Y coordinate
+    output wire [23:0] VGA_COLOR;            // DESim VGA 24-bit RGB color
+    output wire        plot;                 // DESim VGA pixel write strobe
+`else
+    output wire [7:0]  VGA_R;                // FPGA VGA DAC Red
+    output wire [7:0]  VGA_G;                // FPGA VGA DAC Green
+    output wire [7:0]  VGA_B;                // FPGA VGA DAC Blue
+    output wire        VGA_HS;               // FPGA VGA Horizontal Sync
+    output wire        VGA_VS;               // FPGA VGA Vertical Sync
+    output wire        VGA_BLANK_N;          // FPGA VGA Active-low Blanking
+    output wire        VGA_SYNC_N;           // FPGA VGA Sync-on-Green (unused = 0)
+    output wire        VGA_CLK;              // FPGA VGA 25 MHz Pixel Clock
+`endif
 
     wire Resetn;
     wire ps2_rec;
@@ -40,8 +72,6 @@ module top (CLOCK_50, KEY, LEDR, PS2_CLK, PS2_DAT, VGA_X, VGA_Y, VGA_COLOR, plot
     wire [COLOR_DEPTH-1:0] vga_color;
     wire vga_write;
     wire render_done;
-    wire [9:0] vga_out_x;
-    wire [8:0] vga_out_y;
     wire VGA_SYNC;
 
     assign Resetn = KEY[0];
@@ -78,7 +108,11 @@ module top (CLOCK_50, KEY, LEDR, PS2_CLK, PS2_DAT, VGA_X, VGA_Y, VGA_COLOR, plot
         .done(render_done)
     );
 
-    // --- Existing vga_adapter instantiation (imported from DESim starter) ---
+`ifdef DESIM
+    // --- Existing DESim vga_adapter instantiation ---
+    wire [9:0] vga_out_x;
+    wire [8:0] vga_out_y;
+
     vga_adapter #(
         .RESOLUTION(RESOLUTION),
         .COLOR_DEPTH(COLOR_DEPTH),
@@ -98,12 +132,36 @@ module top (CLOCK_50, KEY, LEDR, PS2_CLK, PS2_DAT, VGA_X, VGA_Y, VGA_COLOR, plot
         .plot(plot)
     );
 
-    // Zero-extend narrower resolution coordinates to the fixed DESim VGA port widths
-    assign VGA_X = vga_out_x;
-    assign VGA_Y = vga_out_y;
-
-    // LEDs 3..0 indicate W, A, S, D; unused LEDs 9..4 off
+    assign VGA_X     = vga_out_x;
+    assign VGA_Y     = vga_out_y;
     assign LEDR[9:4] = 6'b0;
+`else
+    // --- Physical FPGA board VGA controller + framebuffer (not from DESim vga_adapter) ---
+    vga_board_adapter #(
+        .COLOR_DEPTH(COLOR_DEPTH)
+    ) VGA_HW (
+        .resetn(Resetn),
+        .clock(CLOCK_50),
+        .color(vga_color),
+        .x(vga_x),
+        .y(vga_y),
+        .write(vga_write),
+        .VGA_SYNC(VGA_SYNC),
+        .VGA_R(VGA_R),
+        .VGA_G(VGA_G),
+        .VGA_B(VGA_B),
+        .VGA_HS(VGA_HS),
+        .VGA_VS(VGA_VS),
+        .VGA_BLANK_N(VGA_BLANK_N),
+        .VGA_SYNC_N(VGA_SYNC_N),
+        .VGA_CLK(VGA_CLK)
+    );
+
+    // Status LEDs: LEDR[9]=framebuffer cleared, LEDR[8]=shape rendered, LEDR[3:0]=WASD
+    assign LEDR[9]   = VGA_SYNC;
+    assign LEDR[8]   = render_done;
+    assign LEDR[7:4] = 4'b0;
+`endif
 
 endmodule
 
