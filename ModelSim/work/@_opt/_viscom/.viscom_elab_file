@@ -1,0 +1,1 @@
+C:/altera_standard/25.1std/questa_fse/win64/VisualizerRls/bin/viscom.exe -nolock -quiet -jmem_size 786432 3D_Rendering_Engine/ModelSim/work.tb_platonic_renderer -quiet -auto_acc_if_foreign -work 3D_Rendering_Engine/ModelSim/work -allow_unnamed -o _opt -id 1-6c2f8026cebf-6aff0edb-6c-92e8

@@ -1,0 +1,242 @@
+m255
+K4
+z2
+!s11f vlog 2025.2 2025.05, May 31 2025
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Users/limue/Downloads/object/3D_Rendering_Engine/sim
+vkeyboard
+Z1 2../keyboard.v|../keyboard_v2.v|../top.v|../vga_adapter/vga_adapter.v|../vga_adapter/vga_address_translator.v|../vga_adapter/vga_controller.v
+Z2 !s110 1795098699
+!i10b 1
+!s100 8`FjGIfQaZXJZ0GEFEMBX2
+IH0dO^mBbf<j9YLlkV2CRc3
+R0
+w1795098451
+8../keyboard_v2.v
+F../keyboard_v2.v
+!i122 1
+L0 10 151
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+Z4 OL;L;2025.2;82
+r1
+!s85 0
+31
+Z5 !s108 1795098699.000000
+!s107 ../vga_adapter/vga_controller.v|../vga_adapter/vga_address_translator.v|../vga_adapter/vga_adapter.v|../top.v|../keyboard_v2.v|../keyboard.v|
+Z6 !s90 ../keyboard.v|../keyboard_v2.v|../top.v|../vga_adapter/vga_adapter.v|../vga_adapter/vga_address_translator.v|../vga_adapter/vga_controller.v|
+!i113 0
+Z7 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z8 tCvgOpt 0 defaultOptions 1085333592
+vps2_clk_dat
+Z9 2../tb/PS2_keyboard.v|../tb/tb.v
+R2
+!i10b 1
+!s100 2d9ZUC4<:[E=nLi8MVD1b1
+IgR:`<RM>?QHQdDEgXCz8J1
+R0
+Z10 w1795029855
+Z11 8../tb/PS2_keyboard.v
+Z12 F../tb/PS2_keyboard.v
+!i122 0
+L0 125 93
+R3
+R4
+r1
+!s85 0
+31
+R5
+Z13 !s107 ../tb/tb.v|../tb/PS2_keyboard.v|
+Z14 !s90 ../tb/PS2_keyboard.v|../tb/tb.v|
+!i113 0
+R7
+R8
+vPS2_keyboard
+R9
+R2
+!i10b 1
+!s100 V^fgVZeiS:[0Tn4`eH<VD1
+IlGm4oJa9bbNeN=LmSA35o2
+R0
+R10
+R11
+R12
+!i122 0
+L0 16 101
+R3
+R4
+r1
+!s85 0
+31
+R5
+R13
+R14
+!i113 0
+R7
+R8
+n@p@s2_keyboard
+vtb
+R9
+R2
+!i10b 1
+!s100 hh<Zz?^8VAgDTkS[_?3bU3
+IhXXUGOdC^`1Adze1;IW0W0
+R0
+w1795098655
+8../tb/tb.v
+F../tb/tb.v
+!i122 0
+L0 6 57
+R3
+R4
+r1
+!s85 0
+31
+R5
+R13
+R14
+!i113 0
+R7
+R8
+vtop
+R1
+R2
+!i10b 1
+!s100 6=J55<Ecd6bi]?3BkQ1FJ3
+IXlMhV52n@D>b:9ID0dfXh1
+R0
+w1795098652
+8../top.v
+F../top.v
+!i122 1
+L0 6 83
+R3
+R4
+r1
+!s85 0
+31
+R5
+Z15 !s107 ../vga_adapter/vga_controller.v|../vga_adapter/vga_address_translator.v|../vga_adapter/vga_adapter.v|../top.v|../keyboard_v2.v|../keyboard.v|
+R6
+!i113 0
+R7
+R8
+vvga_adapter
+R1
+R2
+!i10b 1
+!s100 BJX5AX8gA^FU=dK]9_cAm2
+I;i1CJWSoFJf_;ZP`RfiD]3
+R0
+Z16 w1795098631
+Z17 8../vga_adapter/vga_adapter.v
+Z18 F../vga_adapter/vga_adapter.v
+!i122 1
+L0 13 139
+R3
+R4
+r1
+!s85 0
+31
+R5
+R15
+R6
+!i113 0
+R7
+R8
+vvga_address_translator
+R1
+R2
+!i10b 1
+!s100 cJ^lfaM>CjfIGjLQ_>Y_h1
+Imimc]?1]m]o[OjBXKPzH:2
+R0
+w1795098632
+8../vga_adapter/vga_address_translator.v
+F../vga_adapter/vga_address_translator.v
+!i122 1
+L0 4 21
+R3
+R4
+r1
+!s85 0
+31
+R5
+R15
+R6
+!i113 0
+R7
+R8
+vvga_controller
+R1
+R2
+!i10b 1
+!s100 D2h]2zabn_?7oX=Zf8Wn82
+IBP[2VTF79mo1bYnUh^P>W1
+R0
+w1795098634
+8../vga_adapter/vga_controller.v
+F../vga_adapter/vga_controller.v
+!i122 1
+L0 5 116
+R3
+R4
+r1
+!s85 0
+31
+R5
+R15
+R6
+!i113 0
+R7
+R8
+vvga_convert
+R1
+R2
+!i10b 1
+!s100 e2b77n;KT_]ZUBbH4?Az?3
+IdZQ;ed?>YGYmVMijX8bTc2
+R0
+R16
+R17
+R18
+!i122 1
+L0 170 28
+R3
+R4
+r1
+!s85 0
+31
+R5
+R15
+R6
+!i113 0
+R7
+R8
+vvga_ff
+R1
+R2
+!i10b 1
+!s100 McVE8?AD324JCfiSW6@Gg2
+ION@eF4UX:kS?LBDlcGX`61
+R0
+R16
+R17
+R18
+!i122 1
+L0 154 11
+R3
+R4
+r1
+!s85 0
+31
+R5
+R15
+R6
+!i113 0
+R7
+R8
