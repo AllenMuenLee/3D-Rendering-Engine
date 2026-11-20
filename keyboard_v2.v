@@ -17,7 +17,8 @@ module keyboard (
     object_sel,
     O1_dir,
     O2_dir,
-    LEDR
+    LEDR,
+    wasd_held
 );
     input wire CLOCK_50;
     input wire Resetn;
@@ -29,6 +30,7 @@ module keyboard (
     output wire [1:0] O1_dir;
     output wire [1:0] O2_dir;
     output reg [3:0] LEDR;          // {W, A, S, D} active while each key is held
+    output wire [3:0] wasd_held;    // {W, A, S, D} active while each key is held
 
     reg ps2_clk_q1, PS2_CLK_S;      // synchronized PS2_CLK
     reg ps2_dat_q1, PS2_DAT_S;      // synchronized PS2_DAT
@@ -155,6 +157,7 @@ module keyboard (
     // decode movement direction from scancode
     assign O1_dir = scancode[1:0];               // ps2 key identifier (for a, s, w, z)
     assign O2_dir = {scancode[3], scancode[1]};  // ps2 key identifier (for d, f, r, c)
+    assign wasd_held = LEDR;
 
 endmodule
 

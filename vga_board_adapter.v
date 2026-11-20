@@ -13,7 +13,7 @@
  *    - Outputs standard 640x480 @ 60 Hz VGA timing and 8-bit RGB DAC signals.
  */
 module vga_board_adapter #(
-    parameter COLOR_DEPTH = 9  // 9, 6, or 3
+    parameter COLOR_DEPTH = 24 // 24 (8-bit smooth grayscale BRAM), 9, 6, or 3
 ) (
     input  wire                   resetn,
     input  wire                   clock,       // 50 MHz input clock
@@ -49,9 +49,12 @@ module vga_board_adapter #(
     localparam [9:0] V_LAST   = 10'd524;
 
     // -------------------------------------------------------------------------
-    // Framebuffer BRAM (307,200 x COLOR_DEPTH bits -> infers M10K on Cyclone V)
+    // Framebuffer BRAM (307,200 x VRAM_DEPTH bits -> infers M10K on Cyclone V)
+    //   COLOR_DEPTH == 24 stores 8-bit grayscale intensity (2.46 Mbits, 256 levels)
+    //   so smooth shading fits comfortably inside Cyclone V M10K BRAM.
     // -------------------------------------------------------------------------
-    (* ramstyle = "M10K" *) reg [COLOR_DEPTH-1:0] vram [0:TOTAL_PIXELS-1];
+    localparam integer VRAM_DEPTH = (COLOR_DEPTH == 24) ? 8 : COLOR_DEPTH;
+    (* ramstyle = "M10K" *) reg [VRAM_DEPTH-1:0] vram [0:TOTAL_PIXELS-1];
 
     // Power-up / reset framebuffer clear state
     reg        clearing   = 1'b1;
@@ -77,9 +80,20 @@ module vga_board_adapter #(
     wire [18:0] wr_pixel_addr = {1'b0, y, 9'b0} + {3'b0, y, 7'b0} + {9'b0, x};
     wire        wr_in_bounds  = (x < H_ACTIVE) && (y < V_ACTIVE[8:0]);
 
-    wire        vram_we   = clearing ? 1'b1 : (VGA_SYNC && write && wr_in_bounds);
-    wire [18:0] vram_waddr = clearing ? clear_addr : wr_pixel_addr;
-    wire [COLOR_DEPTH-1:0] vram_wdata = clearing ? {COLOR_DEPTH{1'b0}} : color;
+    wire [VRAM_DEPTH-1:0] color_packed;
+    generate
+        if (COLOR_DEPTH == 24) begin : gen_pack_24
+            // Exact identity when R == G == B (grayscale), Rec.601-approx luma otherwise
+            wire [9:0] luma_sum = {2'b0, color[23:16]} + {1'b0, color[15:8], 1'b0} + {2'b0, color[7:0]};
+            assign color_packed = luma_sum[9:2];
+        end else begin : gen_pack_raw
+            assign color_packed = color;
+        end
+    endgenerate
+
+    wire                  vram_we    = clearing ? 1'b1 : (VGA_SYNC && write && wr_in_bounds);
+    wire [18:0]           vram_waddr = clearing ? clear_addr : wr_pixel_addr;
+    wire [VRAM_DEPTH-1:0] vram_wdata = clearing ? {VRAM_DEPTH{1'b0}} : color_packed;
 
     // Read address: v_cnt * 640 + h_cnt (only valid inside active 640x480 window)
     wire        active_video = (h_cnt < H_ACTIVE) && (v_cnt < V_ACTIVE);
@@ -87,7 +101,7 @@ module vga_board_adapter #(
         ? ({1'b0, v_cnt[8:0], 9'b0} + {3'b0, v_cnt[8:0], 7'b0} + {9'b0, h_cnt})
         : 19'd0;
 
-    reg [COLOR_DEPTH-1:0] fb_q = {COLOR_DEPTH{1'b0}};
+    reg [VRAM_DEPTH-1:0] fb_q = {VRAM_DEPTH{1'b0}};
 
     // Clear controller & VGA sync/read pipeline
     always @(posedge clock) begin
@@ -133,16 +147,27 @@ module vga_board_adapter #(
         end
     end
 
-    // Expand COLOR_DEPTH (9, 6, or 3) to 8-bit RGB; blank to 0 outside active area
-    wire [7:0] r8 = (COLOR_DEPTH == 9) ? {fb_q[8:6], fb_q[8:6], fb_q[8:7]} :
-                    (COLOR_DEPTH == 6) ? {fb_q[5:4], fb_q[5:4], fb_q[5:4], fb_q[5:4]} :
-                                         {8{fb_q[2]}};
-    wire [7:0] g8 = (COLOR_DEPTH == 9) ? {fb_q[5:3], fb_q[5:3], fb_q[5:4]} :
-                    (COLOR_DEPTH == 6) ? {fb_q[3:2], fb_q[3:2], fb_q[3:2], fb_q[3:2]} :
-                                         {8{fb_q[1]}};
-    wire [7:0] b8 = (COLOR_DEPTH == 9) ? {fb_q[2:0], fb_q[2:0], fb_q[2:1]} :
-                    (COLOR_DEPTH == 6) ? {fb_q[1:0], fb_q[1:0], fb_q[1:0], fb_q[1:0]} :
-                                         {8{fb_q[0]}};
+    // Expand stored pixel (24->8-bit grayscale, or 9/6/3-bit RGB) to 8-bit DAC RGB
+    wire [7:0] r8, g8, b8;
+    generate
+        if (COLOR_DEPTH == 24) begin : gen_exp_24
+            assign r8 = fb_q;
+            assign g8 = fb_q;
+            assign b8 = fb_q;
+        end else if (COLOR_DEPTH == 9) begin : gen_exp_9
+            assign r8 = {fb_q[8:6], fb_q[8:6], fb_q[8:7]};
+            assign g8 = {fb_q[5:3], fb_q[5:3], fb_q[5:4]};
+            assign b8 = {fb_q[2:0], fb_q[2:0], fb_q[2:1]};
+        end else if (COLOR_DEPTH == 6) begin : gen_exp_6
+            assign r8 = {fb_q[5:4], fb_q[5:4], fb_q[5:4], fb_q[5:4]};
+            assign g8 = {fb_q[3:2], fb_q[3:2], fb_q[3:2], fb_q[3:2]};
+            assign b8 = {fb_q[1:0], fb_q[1:0], fb_q[1:0], fb_q[1:0]};
+        end else begin : gen_exp_3
+            assign r8 = {8{fb_q[2]}};
+            assign g8 = {8{fb_q[1]}};
+            assign b8 = {8{fb_q[0]}};
+        end
+    endgenerate
 
     assign VGA_R = VGA_BLANK_N ? r8 : 8'd0;
     assign VGA_G = VGA_BLANK_N ? g8 : 8'd0;

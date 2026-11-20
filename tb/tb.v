@@ -53,7 +53,7 @@ module tb();
         end
     end
 
-    top DUT (.CLOCK_50(CLOCK_50), .KEY(KEY), .LEDR(LEDR),
+    top DUT (.CLOCK_50(CLOCK_50), .SW(SW), .KEY(KEY), .LEDR(LEDR),
              .PS2_CLK(ps2_clk), .PS2_DAT(ps2_dat),
              .VGA_X(VGA_X), .VGA_Y(VGA_Y), .VGA_COLOR(VGA_COLOR), .plot(plot));
 

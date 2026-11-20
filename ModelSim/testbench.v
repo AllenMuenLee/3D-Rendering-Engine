@@ -5,6 +5,7 @@ module testbench ();
     parameter CLOCK_PERIOD = 20;
 
     reg CLOCK_50;
+    reg [9:0] SW = 10'b0;
     reg [3:0] KEY;
     wire [9:0] LEDR;
     wire [9:0] VGA_X;
@@ -79,6 +80,7 @@ module testbench ();
 
     top U1 (
         .CLOCK_50(CLOCK_50),
+        .SW(SW),
         .KEY(KEY),
         .LEDR(LEDR),
         .PS2_CLK(ps2_clk),

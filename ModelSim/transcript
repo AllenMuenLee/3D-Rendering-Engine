@@ -1,88 +1,41 @@
-# //  Questa Altera Starter FPGA Edition-64
-# //  Version 2025.2 win64 May 31 2025
+# vsim -c -do "run -all; quit -f" work.testbench_point_light 
+# Start time: 15:26:10 on Nov 20,2026
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  Questa Intel Starter FPGA Edition-64
+# //  Version 2023.3 win64 Jul 17 2023
 # //
-# // Unpublished work. Copyright 2025 Siemens
+# //  Copyright 1991-2023 Mentor Graphics Corporation
+# //  All Rights Reserved.
 # //
-# // This material contains trade secrets or otherwise confidential information
-# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
-# // "SISW"), or its licensors. Access to and use of this information is strictly
-# // limited as set forth in the Customer's applicable agreements with SISW.
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
 # //
-# // This material may not be copied, distributed, or otherwise disclosed outside
-# // of the Customer's facilities without the express written permission of SISW,
-# // and may not be used in any way not expressly authorized by SISW.
-# //
-# do testbench_v2.tcl
-# ** Warning: (vlib-34) Library already exists at "work".
-# Errors: 0, Warnings: 1
-# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
-# Start time: 10:16:19 on Nov 19,2026
-# vlog -reportprogress 300 ../top.v ../keyboard_v2.v ../platonic_lut.v ../platonic_renderer.v ../vga_adapter/vga_adapter.v ../vga_adapter/vga_address_translator.v ../vga_adapter/vga_controller.v 
-# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# -- Compiling module top
-# -- Compiling module keyboard
-# -- Compiling module platonic_lut
-# -- Compiling module platonic_renderer
-# -- Compiling module vga_adapter
-# -- Compiling module vga_ff
-# -- Compiling module vga_convert
-# -- Compiling module vga_address_translator
-# -- Compiling module vga_controller
-# 
-# Top level modules:
-# 	top
-# 	vga_ff
-# 	vga_controller
-# End time: 10:16:20 on Nov 19,2026, Elapsed time: 0:00:01
+# Loading work.testbench_point_light(fast)
+# run -all
+# PASS [Timing]: Cube rendered in 174341 cycles (< 400000)
+# PASS [Accuracy]: Checked 51380 rendered pixels; max ||U||^2 err = 4 LSB, max flux err = 1 LSB (in Q1.14)
+#   Cube tri  2: px= 3838, brightness_q14=[ 3438 ..  4211] (span=773)
+#   Cube tri  3: px= 3838, brightness_q14=[ 3745 ..  5429] (span=1684)
+#   Cube tri  4: px= 8760, brightness_q14=[ 8477 .. 11955] (span=3478)
+#   Cube tri  5: px= 8760, brightness_q14=[ 7172 ..  9166] (span=1994)
+#   Cube tri  8: px=13092, brightness_q14=[ 3179 ..  3827] (span=648)
+#   Cube tri  9: px=13092, brightness_q14=[ 3457 ..  4911] (span=1454)
+# PASS [Point-light gradient]: 6 visible triangles exhibit smooth per-pixel point-light flux gradient
+#   Smooth 8-bit grayscale stats (Cube): 111 distinct gray levels in [49 .. 186] / 255
+# PASS [Smooth 10%..80% range]: 111 smooth 8-bit gray levels within [10%..80%] ([25..204])
+#   Right-light (+0.5,+2.0,-1.0) avg: left=60.17, right=115.82
+#   Left-light  (-1.5,+1.5, 0.0) avg: left=131.79, right=106.53
+# PASS [Light position shift]: Moving light coordinate to (-1.5,+1.5,0) shifts peak brightness to left side
+# ALL POINT LIGHT TESTS PASSED
+# ** Note: $stop    : testbench_point_light.v(245)
+#    Time: 3486910 ns  Iteration: 1  Instance: /testbench_point_light
+# Break at testbench_point_light.v line 245
+# Stopped at testbench_point_light.v line 245
+#  quit -f
+# End time: 15:26:28 on Nov 20,2026, Elapsed time: 0:00:18
 # Errors: 0, Warnings: 0
-# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
-# Start time: 10:16:20 on Nov 19,2026
-# vlog -reportprogress 300 ../tb/PS2_keyboard.v 
-# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# -- Compiling module PS2_keyboard
-# -- Compiling module ps2_clk_dat
-# 
-# Top level modules:
-# 	PS2_keyboard
-# End time: 10:16:20 on Nov 19,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
-# Start time: 10:16:20 on Nov 19,2026
-# vlog -reportprogress 300 testbench_v2.v 
-# ** Note: (vlog-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# -- Compiling module testbench_v2
-# 
-# Top level modules:
-# 	testbench_v2
-# End time: 10:16:20 on Nov 19,2026, Elapsed time: 0:00:00
-# Errors: 0, Warnings: 0
-# ** Note: (vsim-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# vsim -voptargs="+acc" work.testbench_v2 -Lf 220model -Lf altera_mf_ver -Lf verilog 
-# Start time: 10:16:21 on Nov 19,2026
-# ** Note: (vsim-3812) Design is being optimized...
-# ** Warning: (vopt-10908) Some optimizations are turned off because the +acc switch is in effect.
-# ** Note: (vopt-220) 'C:/altera_standard/25.1std/questa_fse/win64/../modelsim.ini' is used as the ini file.
-# ** Note: (vopt-143) Recognized 1 FSM in module "PS2_keyboard(fast)".
-# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
-# Loading work.testbench_v2(fast)
-# Loading work.top(fast)
-# Loading work.keyboard(fast)
-# Loading work.platonic_renderer(fast)
-# Loading work.platonic_lut(fast)
-# Loading work.vga_adapter(fast)
-# Loading work.vga_convert(fast)
-# Loading work.PS2_keyboard(fast)
-# Loading work.ps2_clk_dat(fast)
-# PASS Press W -> LEDR[3:0]=1000 (W=1 A=0 S=0 D=0)
-# PASS Hold W + Press D -> LEDR[3:0]=1001 (W=1 A=0 S=0 D=1)
-# PASS Hold W,D + A -> LEDR[3:0]=1101 (W=1 A=1 S=0 D=1)
-# PASS Hold W,A,D + S -> LEDR[3:0]=1111 (W=1 A=1 S=1 D=1)
-# PASS Ext Up press -> LEDR[3:0]=1111 (W=1 A=1 S=1 D=1)
-# PASS Ext Up release -> LEDR[3:0]=1111 (W=1 A=1 S=1 D=1)
-# PASS Release W -> LEDR[3:0]=0111 (W=0 A=1 S=1 D=1)
-# PASS Release S -> LEDR[3:0]=0101 (W=0 A=1 S=0 D=1)
-# PASS Release A -> LEDR[3:0]=0001 (W=0 A=0 S=0 D=1)
-# PASS Release D -> LEDR[3:0]=0000 (W=0 A=0 S=0 D=0)
-# ALL MULTI-KEY TESTS PASSED
-# End time: 10:26:32 on Nov 19,2026, Elapsed time: 0:10:11
-# Errors: 0, Warnings: 1

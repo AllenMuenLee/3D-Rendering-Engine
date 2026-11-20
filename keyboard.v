@@ -16,7 +16,8 @@ module keyboard (
     object_sel,
     O1_dir,
     O2_dir,
-    LEDR
+    LEDR,
+    wasd_held
 );
     input wire CLOCK_50;
     input wire Resetn;
@@ -28,6 +29,7 @@ module keyboard (
     output wire [1:0] O1_dir;
     output wire [1:0] O2_dir;
     output reg [3:0] LEDR;
+    output reg [3:0] wasd_held;     // {W, A, S, D} active while each key is held
 
     reg ps2_clk_q1, PS2_CLK_S;      // synchronized PS2_CLK
     reg ps2_dat_q1, PS2_DAT_S;      // synchronized PS2_DAT
@@ -39,6 +41,7 @@ module keyboard (
     reg [3:0] Packet;               // number of bits received in current frame (0..11)
     reg [15:0] idle_cnt;            // idle counter to resync Packet after >1 ms bus idle
     reg break_code;                 // set after receiving 8'hF0 break prefix
+    reg ext_code;                   // set after receiving 8'hE0 extended prefix
     wire valid_frame;               // framing + odd parity check
 
     // two-FF synchronizers for PS2 signals (PS2 idles high)
@@ -104,24 +107,43 @@ module keyboard (
     // validate START=0, STOP=1, and odd parity
     assign valid_frame = (frame[0] == 1'b0) && (frame[10] == 1'b1) && ((^frame[9:1]) == 1'b1);
 
-    // capture make scancode immediately on key press; skip F0 break sequences and E0 prefix
+    // capture make scancode immediately on key press; track F0 break sequences and E0 prefix
     always @(posedge CLOCK_50) begin
         if (!Resetn) begin
             scancode   <= 8'b0;
             break_code <= 1'b0;
+            ext_code   <= 1'b0;
             ps2_rec    <= 1'b0;
+            wasd_held  <= 4'b0000;
         end else begin
             ps2_rec <= 1'b0;
             if (Packet == 4'd11 && valid_frame) begin
                 if (frame[8:1] == 8'hF0) begin
                     break_code <= 1'b1;
                 end else if (frame[8:1] == 8'hE0) begin
-                    // ignore extended key prefix
+                    ext_code <= 1'b1;
+                end else if (ext_code) begin
+                    ext_code   <= 1'b0;
+                    break_code <= 1'b0;
                 end else if (break_code) begin
                     break_code <= 1'b0;
+                    case (frame[8:1])
+                        8'h1D: wasd_held[3] <= 1'b0; // 'w' released
+                        8'h1C: wasd_held[2] <= 1'b0; // 'a' released
+                        8'h1B: wasd_held[1] <= 1'b0; // 's' released
+                        8'h23: wasd_held[0] <= 1'b0; // 'd' released
+                        default: ;
+                    endcase
                 end else begin
                     scancode <= frame[8:1];
                     ps2_rec  <= 1'b1;
+                    case (frame[8:1])
+                        8'h1D: wasd_held[3] <= 1'b1; // 'w' pressed
+                        8'h1C: wasd_held[2] <= 1'b1; // 'a' pressed
+                        8'h1B: wasd_held[1] <= 1'b1; // 's' pressed
+                        8'h23: wasd_held[0] <= 1'b1; // 'd' pressed
+                        default: ;
+                    endcase
                 end
             end
         end

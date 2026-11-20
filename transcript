@@ -1,0 +1,46 @@
+# vsim -c -work work_sim_chk work_sim_chk.testbench_wasd_rot -do "run -all; quit -f" 
+# Start time: 14:08:57 on Nov 20,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# //  Questa Intel Starter FPGA Edition-64
+# //  Version 2023.3 win64 Jul 17 2023
+# //
+# //  Copyright 1991-2023 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading work.testbench_wasd_rot(fast)
+# run -all
+# PASS [Initial default orthonormality]: max_err=1 LSB in Q2.16
+# PASS [Initial Cube]: 51380 pixels drawn, hash=29db09f8
+# PASS [Tap A (+Z fixed vert)]: screen Z fixed (max_dz=0), X rotated (max_dx=1303)
+# PASS [Tap A redraw]: cleared=307200, shape=50840, pixels updated
+# PASS [After A release]: rotation stopped cleanly
+# PASS [Tap D (-Z fixed vert)]: screen Z fixed (max_dz=1), X rotated (max_dx=1303)
+# PASS [Tap D return]: returned to exact base frame hash 29db09f8
+# PASS [Tap W (-X fixed horiz)]: screen X fixed (max_dx=0), Z rotated (max_dz=1283)
+# PASS [Tap W redraw]: cleared=307200, shape=49506, pixels updated
+# PASS [Tap S (+X fixed horiz)]: screen X fixed (max_dx=0), Z rotated (max_dz=1283)
+# PASS [Tap S return]: returned to exact base frame hash 29db09f8
+# PASS [After 90d Z, Tap W (-X)]: screen X fixed (max_dx=0), Z rotated (max_dz=1365)
+# PASS [After 90d Z + W orthonormality]: max_err=2 LSB in Q2.16
+# PASS [After 90d X, Tap A (+Z)]: screen Z fixed (max_dz=1), X rotated (max_dx=1318)
+# PASS [After 90d X + A orthonormality]: max_err=0 LSB in Q2.16
+# PASS [Hold A+W]: simultaneous rotation applied 9 updates
+# PASS [After Hold A+W orthonormality]: max_err=1 LSB in Q2.16
+# PASS [Hold A+D cancel]: matrix held steady at ver=30
+# PASS [Hold W+S cancel]: matrix held steady at ver=32
+# ALL WASD ROTATION TESTS PASSED
+# ** Note: $stop    : ModelSim/testbench_wasd_rot.v(366)
+#    Time: 42267110 ns  Iteration: 1  Instance: /testbench_wasd_rot
+# Break at ModelSim/testbench_wasd_rot.v line 366
+# Stopped at ModelSim/testbench_wasd_rot.v line 366
+#  quit -f
+# End time: 14:09:19 on Nov 20,2026, Elapsed time: 0:00:22
+# Errors: 0, Warnings: 0
