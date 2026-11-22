@@ -5,7 +5,7 @@ quit -sim
 vlib work;
 
 # compile the Verilog source code in the parent folders
-vlog +define+DESIM ../top.v ../keyboard.v ../platonic_lut.v ../sin_lut.v ../platonic_renderer.v ../vga_adapter/*.v
+vlog +define+DESIM ../*.v ../object_lib/keyboard.v ../object_lib/vga_adapter.v ../object_lib/vga_address_translator.v ../object_lib/vga_controller.v
 vlog ../tb/PS2_keyboard.v
 # compile the Verilog code of the testbench
 vlog testbench.v

@@ -5,7 +5,7 @@ quit -sim
 vlib work;
 
 # compile the Verilog source code for the VGA adapter
-vlog ../vga_adapter/*.v
+vlog ../object_lib/vga_adapter.v ../object_lib/vga_address_translator.v ../object_lib/vga_controller.v
 # compile the VGA testbench
 vlog testbench_vga.v
 # start the Simulator with full visibility for waveforms

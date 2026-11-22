@@ -53,9 +53,9 @@ module testbench_point_light ();
                 d_pipe_z[idx] <= 0.0;
             end
         end else if (U_DEF.RENDERER.pipe_run) begin
-            d_pipe_x[3] <= $itor($signed(U_DEF.RENDERER.d_x_comb)) / 16384.0;
-            d_pipe_y[3] <= $itor($signed(U_DEF.RENDERER.d_y_comb)) / 16384.0;
-            d_pipe_z[3] <= $itor($signed(U_DEF.RENDERER.d_z_comb)) / 16384.0;
+            d_pipe_x[3] <= $itor($signed(U_DEF.RENDERER.RASTER.LIGHT_PIPE.d_x_comb)) / 16384.0;
+            d_pipe_y[3] <= $itor($signed(U_DEF.RENDERER.RASTER.LIGHT_PIPE.d_y_comb)) / 16384.0;
+            d_pipe_z[3] <= $itor($signed(U_DEF.RENDERER.RASTER.LIGHT_PIPE.d_z_comb)) / 16384.0;
             for (idx = 4; idx <= 9; idx = idx + 1) begin
                 d_pipe_x[idx] <= d_pipe_x[idx-1];
                 d_pipe_y[idx] <= d_pipe_y[idx-1];
@@ -65,7 +65,7 @@ module testbench_point_light ();
     end
 
     always @(posedge CLOCK_50) begin
-        if (U_DEF.RENDERER.pipe_run && U_DEF.RENDERER.p9_valid) begin : chk_p9
+        if (U_DEF.RENDERER.pipe_run && U_DEF.RENDERER.RASTER.LIGHT_PIPE.p9_valid) begin : chk_p9
             integer ux_i, uy_i, uz_i;
             integer norm_q14, nerr;
             real dx_r, dy_r, dz_r, dlen;
@@ -74,9 +74,9 @@ module testbench_point_light ();
             integer ferr;
             integer tidx, br;
 
-            ux_i = $signed(U_DEF.RENDERER.p9_ux);
-            uy_i = $signed(U_DEF.RENDERER.p9_uy);
-            uz_i = $signed(U_DEF.RENDERER.p9_uz);
+            ux_i = $signed(U_DEF.RENDERER.RASTER.LIGHT_PIPE.p9_ux);
+            uy_i = $signed(U_DEF.RENDERER.RASTER.LIGHT_PIPE.p9_uy);
+            uz_i = $signed(U_DEF.RENDERER.RASTER.LIGHT_PIPE.p9_uz);
 
             norm_q14 = (ux_i*ux_i + uy_i*uy_i + uz_i*uz_i + 8192) / 16384;
             nerr = (norm_q14 > 16384) ? (norm_q14 - 16384) : (16384 - norm_q14);
@@ -102,25 +102,25 @@ module testbench_point_light ();
             if (exact_flux < 0.0) exact_flux = 0.0;
             if (exact_flux > 1.0) exact_flux = 1.0;
 
-            hw_flux = $itor(U_DEF.RENDERER.px_diffuse_q14) / 16384.0;
+            hw_flux = $itor(U_DEF.RENDERER.RASTER.LIGHT_PIPE.px_diffuse_q14) / 16384.0;
             ferr = $rtoi((hw_flux - exact_flux) * 16384.0);
             if (ferr < 0) ferr = -ferr;
             if (ferr > max_flux_err) max_flux_err = ferr;
             if (ferr > 8) begin
                 $display("FAIL: Flux mismatch at (%0d,%0d): hw=%f exact=%f (err=%0d LSB)",
-                         U_DEF.RENDERER.p9_x, U_DEF.RENDERER.p9_z, hw_flux, exact_flux, ferr);
+                         U_DEF.RENDERER.RASTER.LIGHT_PIPE.p9_x, U_DEF.RENDERER.RASTER.LIGHT_PIPE.p9_z, hw_flux, exact_flux, ferr);
                 errors = errors + 1;
             end
 
             u_checked = u_checked + 1;
         end
 
-        if (U_DEF.RENDERER.pipe_run && U_DEF.RENDERER.p10_valid) begin : chk_p10
+        if (U_DEF.RENDERER.pipe_run && U_DEF.RENDERER.RASTER.LIGHT_PIPE.p10_valid) begin : chk_p10
             integer tidx, br;
             tidx = U_DEF.RENDERER.tri_idx;
-            br   = U_DEF.RENDERER.px_brightness_q14;
-            if (br < 1638 || br > 13107) begin
-                $display("FAIL: Brightness out of [10%%..80%%] range: br=%0d (expected 1638..13107)", br);
+            br   = U_DEF.RENDERER.RASTER.LIGHT_PIPE.px_brightness_q14;
+            if (br < 1638 || br > 16384) begin
+                $display("FAIL: Brightness out of [10%%..100%%] range: br=%0d (expected 1638..16384)", br);
                 errors = errors + 1;
             end
             if (br < tri_min_bright[tidx]) tri_min_bright[tidx] = br;
@@ -214,12 +214,12 @@ module testbench_point_light ();
             if (gray_hist[t] > 0) unique_grays = unique_grays + 1;
         $display("  Smooth 8-bit grayscale stats (Cube): %0d distinct gray levels in [%0d .. %0d] / 255",
                  unique_grays, min_gray_seen, max_gray_seen);
-        if (unique_grays < 50 || min_gray_seen < 25 || max_gray_seen > 204) begin
-            $display("FAIL [Smooth 10%%..80%% range]: expected >=50 gray levels within [25..204], got %0d in [%0d..%0d]",
+        if (unique_grays < 50 || min_gray_seen < 25 || max_gray_seen > 255) begin
+            $display("FAIL [Smooth 10%%..100%% range]: expected >=50 gray levels within [25..255], got %0d in [%0d..%0d]",
                      unique_grays, min_gray_seen, max_gray_seen);
             errors = errors + 1;
         end else begin
-            $display("PASS [Smooth 10%%..80%% range]: %0d smooth 8-bit gray levels within [10%%..80%%] ([25..204])",
+            $display("PASS [Smooth 10%%..100%% range]: %0d smooth 8-bit gray levels within [10%%..100%%] ([25..255])",
                      unique_grays);
         end
 

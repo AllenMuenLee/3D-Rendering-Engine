@@ -1,5 +1,5 @@
-# vsim -c -do "run -all; quit -f" work.testbench_point_light 
-# Start time: 15:26:10 on Nov 20,2026
+# vsim -c testbench_simple -do "run -all; quit -f" 
+# Start time: 18:28:44 on Nov 22,2026
 # ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # //  Questa Intel Starter FPGA Edition-64
 # //  Version 2023.3 win64 Jul 17 2023
@@ -15,27 +15,17 @@
 # //  is prohibited from disclosure under the Trade Secrets Act,
 # //  18 U.S.C. Section 1905.
 # //
-# Loading work.testbench_point_light(fast)
+# Loading work.testbench_simple(fast)
 # run -all
-# PASS [Timing]: Cube rendered in 174341 cycles (< 400000)
-# PASS [Accuracy]: Checked 51380 rendered pixels; max ||U||^2 err = 4 LSB, max flux err = 1 LSB (in Q1.14)
-#   Cube tri  2: px= 3838, brightness_q14=[ 3438 ..  4211] (span=773)
-#   Cube tri  3: px= 3838, brightness_q14=[ 3745 ..  5429] (span=1684)
-#   Cube tri  4: px= 8760, brightness_q14=[ 8477 .. 11955] (span=3478)
-#   Cube tri  5: px= 8760, brightness_q14=[ 7172 ..  9166] (span=1994)
-#   Cube tri  8: px=13092, brightness_q14=[ 3179 ..  3827] (span=648)
-#   Cube tri  9: px=13092, brightness_q14=[ 3457 ..  4911] (span=1454)
-# PASS [Point-light gradient]: 6 visible triangles exhibit smooth per-pixel point-light flux gradient
-#   Smooth 8-bit grayscale stats (Cube): 111 distinct gray levels in [49 .. 186] / 255
-# PASS [Smooth 10%..80% range]: 111 smooth 8-bit gray levels within [10%..80%] ([25..204])
-#   Right-light (+0.5,+2.0,-1.0) avg: left=60.17, right=115.82
-#   Left-light  (-1.5,+1.5, 0.0) avg: left=131.79, right=106.53
-# PASS [Light position shift]: Moving light coordinate to (-1.5,+1.5,0) shifts peak brightness to left side
-# ALL POINT LIGHT TESTS PASSED
-# ** Note: $stop    : testbench_point_light.v(245)
-#    Time: 3486910 ns  Iteration: 1  Instance: /testbench_point_light
-# Break at testbench_point_light.v line 245
-# Stopped at testbench_point_light.v line 245
+# [TEST 1] Cube rendered: lit_pixels=1024, brightness=[34..125]
+# [TEST 2] After 'D' press: angle_z=335 (expected != 35), lit_pixels=2048, brightness=[26..158]
+# [TEST 3] Star rendered: lit_pixels=1024, brightness=[26..230]
+# [TEST 4] Blank screen: lit_pixels=0 (expected 0)
+# ALL TESTS PASSED!
+# ** Note: $stop    : testbench_simple.v(144)
+#    Time: 25237730 ns  Iteration: 1  Instance: /testbench_simple
+# Break at testbench_simple.v line 144
+# Stopped at testbench_simple.v line 144
 #  quit -f
-# End time: 15:26:28 on Nov 20,2026, Elapsed time: 0:00:18
+# End time: 18:28:57 on Nov 22,2026, Elapsed time: 0:00:13
 # Errors: 0, Warnings: 0
