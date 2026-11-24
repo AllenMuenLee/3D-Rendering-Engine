@@ -21,7 +21,8 @@ module testbench_simple;
     // Override KEY_DELAY_CYCLES for fast simulation (represents 0.05s in hardware)
     top #(
         .KEY_DELAY_CYCLES (22'd20),
-        .ROT_STEP_DEG     (9'd15)
+        .SIN_DELTA        (16'sd4240),
+        .COS_DELTA        (16'sd15826)
     ) DUT (
         .CLOCK_50  (CLOCK_50),
         .SW        (SW),
@@ -58,6 +59,19 @@ module testbench_simple;
     integer lit_pixels;
     integer min_bright, max_bright;
     integer errors;
+    integer rot_toggles;
+    reg     prev_rot_req_tb;
+
+    always @(posedge CLOCK_50) begin
+        if (!KEY[0]) begin
+            rot_toggles     <= 0;
+            prev_rot_req_tb <= 1'b0;
+        end else begin
+            if (DUT.rot_req !== prev_rot_req_tb)
+                rot_toggles <= rot_toggles + 1;
+            prev_rot_req_tb <= DUT.rot_req;
+        end
+    end
 
     always @(posedge CLOCK_50) begin
         if (plot && VGA_COLOR != 24'd0) begin
@@ -93,8 +107,8 @@ module testbench_simple;
         wait_idle();
         $display("[TEST 1] Cube rendered: lit_pixels=%0d, brightness=[%0d..%0d]",
                  lit_pixels, min_bright, max_bright);
-        if (lit_pixels < 500 || max_bright <= min_bright) begin
-            $display("FAIL: Cube did not render with shaded pixels!");
+        if (lit_pixels < 500) begin
+            $display("FAIL: Cube did not render!");
             errors = errors + 1;
         end
 
@@ -102,28 +116,29 @@ module testbench_simple;
         lit_pixels = 0;
         min_bright = 255;
         max_bright = 0;
+        rot_toggles = 0;
         send_ps2_byte(8'h23);
         repeat (30) @(posedge CLOCK_50);
         send_ps2_byte(8'hF0);
         send_ps2_byte(8'h23);
         wait_idle();
-        $display("[TEST 2] After 'D' press: angle_z=%0d (expected != 35), lit_pixels=%0d, brightness=[%0d..%0d]",
-                 DUT.angle_z, lit_pixels, min_bright, max_bright);
-        if (DUT.angle_z == 9'd35 || lit_pixels < 500) begin
-            $display("FAIL: Rotation did not update angle or re-render!");
+        $display("[TEST 2] After 'D' press: rot_toggles=%0d, rot_z=%0d (expected -1), lit_pixels=%0d, brightness=[%0d..%0d]",
+                 rot_toggles, DUT.rot_z, lit_pixels, min_bright, max_bright);
+        if (rot_toggles == 0 || DUT.rot_z != -2'sd1 || lit_pixels < 500 || max_bright <= min_bright) begin
+            $display("FAIL: Rotation did not trigger delta step or re-render!");
             errors = errors + 1;
         end
 
-        // 3. Switch to Star (SW[0])
+        // 3. Switch to NVIDIA Logo (SW[3])
         lit_pixels = 0;
         min_bright = 255;
         max_bright = 0;
-        SW = 10'b00000_00001;
+        SW = 10'b00000_01000;
         wait_idle();
-        $display("[TEST 3] Star rendered: lit_pixels=%0d, brightness=[%0d..%0d]",
+        $display("[TEST 3] NVIDIA Logo rendered: lit_pixels=%0d, brightness=[%0d..%0d]",
                  lit_pixels, min_bright, max_bright);
         if (lit_pixels < 500) begin
-            $display("FAIL: Star did not render!");
+            $display("FAIL: NVIDIA Logo did not render!");
             errors = errors + 1;
         end
 

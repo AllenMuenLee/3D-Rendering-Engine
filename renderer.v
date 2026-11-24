@@ -1,8 +1,9 @@
 `default_nettype none
 
 module renderer #(
-    parameter integer       NUM_POINTS = 2048,
-
+    parameter signed [15:0] SIN_DELTA  = 16'sd1428,
+    parameter signed [15:0] COS_DELTA  = 16'sd16322,
+    parameter integer       MAX_TRIS   = 256,
     parameter signed [10:0] LIGHT_X    = 11'sd64,
     parameter signed [10:0] LIGHT_Y    = 11'sd256,
     parameter signed [10:0] LIGHT_Z    = -11'sd128,
@@ -17,11 +18,12 @@ module renderer #(
     input  wire        clk,
     input  wire        resetn,
     input  wire        vga_sync,
-    input  wire        shape_enable,
-    input  wire [3:0]  shape_id,
-    input  wire [8:0]  angle_x,
-    input  wire [8:0]  angle_z,
-    output reg  [9:0]  vga_x,
+    input  wire              shape_enable,
+    input  wire [3:0]        shape_id,
+    input  wire              rot_req,
+    input  wire signed [1:0] rot_x,
+    input  wire signed [1:0] rot_z,
+    output reg  [9:0]        vga_x,
     output reg  [8:0]  vga_y,
     output reg  [23:0] vga_color,
     output reg         vga_write,
@@ -33,42 +35,48 @@ module renderer #(
         S_MATRIX_MUL = 2'd2,
         S_RENDER     = 2'd3;
 
-    reg [1:0]  state;
-    reg        sub;
-    reg [10:0] idx;
-    reg [9:0]  clear_x;
-    reg [8:0]  clear_y;
-    reg        screen_dirty;
+    reg [1:0] state;
+    reg [1:0] sub;
+    reg [7:0] idx;
+    reg [9:0] clear_x;
+    reg [8:0] clear_y;
+    reg       screen_dirty;
 
     reg       prev_enable;
     reg [3:0] prev_shape_id;
-    reg [8:0] prev_angle_x;
-    reg [8:0] prev_angle_z;
+    reg       prev_rot_req;
+    reg       load_base;
 
-    wire need_update = (shape_enable != prev_enable) ||
-                       (shape_enable && (
-                           (shape_id != prev_shape_id) ||
-                           (angle_x  != prev_angle_x)  ||
-                           (angle_z  != prev_angle_z)
-                       ));
+    wire shape_changed = (shape_enable != prev_enable) ||
+                         (shape_enable && (shape_id != prev_shape_id));
+    wire rot_pending   = (rot_req != prev_rot_req);
+    wire need_update   = shape_changed || (shape_enable && rot_pending);
 
-    wire signed [15:0] sx, cx, sz, cz;
-    sin_lut LUT_SX (.angle(angle_x),         .sin_val(sx));
-    sin_lut LUT_CX (.angle(angle_x + 9'd90), .sin_val(cx));
-    sin_lut LUT_SZ (.angle(angle_z),         .sin_val(sz));
-    sin_lut LUT_CZ (.angle(angle_z + 9'd90), .sin_val(cz));
+    wire signed [15:0] sx = (rot_x == 2'sd1)  ?  SIN_DELTA :
+                            (rot_x == -2'sd1) ? -SIN_DELTA : 16'sd0;
+    wire signed [15:0] cx = (rot_x == 2'sd0)  ?  16'sd16384 : COS_DELTA;
+    wire signed [15:0] sz = (rot_z == 2'sd1)  ?  SIN_DELTA :
+                            (rot_z == -2'sd1) ? -SIN_DELTA : 16'sd0;
+    wire signed [15:0] cz = (rot_z == 2'sd0)  ?  16'sd16384 : COS_DELTA;
 
-    wire signed [8:0] base_px, base_py, base_pz;
-    wire signed [8:0] base_nx, base_ny, base_nz;
+    wire [7:0]        num_tris;
+    wire signed [8:0] bv0x, bv0y, bv0z;
+    wire signed [8:0] bv1x, bv1y, bv1z;
+    wire signed [8:0] bv2x, bv2y, bv2z;
+    wire signed [8:0] bnx,  bny,  bnz;
+
     shape_lut #(
-        .NUM_POINTS (NUM_POINTS),
-        .INIT_FILE  (LUT_FILE)
+        .MAX_TRIS  (MAX_TRIS),
+        .INIT_FILE (LUT_FILE)
     ) BASE_LUT (
-        .clk       (clk),
-        .shape_id  (prev_shape_id),
-        .point_idx (idx),
-        .px (base_px), .py (base_py), .pz (base_pz),
-        .nx (base_nx), .ny (base_ny), .nz (base_nz)
+        .clk      (clk),
+        .shape_id (prev_shape_id),
+        .tri_idx  (idx),
+        .num_tris (num_tris),
+        .v0x (bv0x), .v0y (bv0y), .v0z (bv0z),
+        .v1x (bv1x), .v1y (bv1y), .v1z (bv1z),
+        .v2x (bv2x), .v2y (bv2y), .v2z (bv2z),
+        .nx  (bnx),  .ny  (bny),  .nz  (bnz)
     );
 
     reg signed [15:0] r00, r01, r02;
@@ -86,17 +94,59 @@ module renderer #(
         reg   signed [26:0] acc;
         begin
             acc = (m0 * v0) + (m1 * v1) + (m2 * v2) + 27'sd8192;
-            mat_row_mul = acc >>> 14;
+            mat_row_mul = acc[22:14];
         end
     endfunction
 
-    (* ramstyle = "M10K" *) reg [53:0] updated_lut [0:NUM_POINTS-1];
-    reg signed [8:0] cur_px, cur_py, cur_pz;
-    reg signed [8:0] cur_nx, cur_ny, cur_nz;
+    (* ramstyle = "M10K" *) reg [107:0] updated_lut [0:MAX_TRIS-1];
+    reg [107:0] upd_rdata;
 
-    wire signed [11:0] dx = LIGHT_X - cur_px;
-    wire signed [11:0] dy = LIGHT_Y - cur_py;
-    wire signed [11:0] dz = LIGHT_Z - cur_pz;
+    wire upd_we = (state == S_MATRIX_MUL) && (sub == 2'd1);
+    wire [107:0] upd_wdata = load_base ? {
+        bv0x, bv0y, bv0z,
+        bv1x, bv1y, bv1z,
+        bv2x, bv2y, bv2z,
+        bnx,  bny,  bnz
+    } : {
+        mat_row_mul(r00, r01, r02, cv0x, cv0y, cv0z),
+        mat_row_mul(r10, r11, r12, cv0x, cv0y, cv0z),
+        mat_row_mul(r20, r21, r22, cv0x, cv0y, cv0z),
+        mat_row_mul(r00, r01, r02, cv1x, cv1y, cv1z),
+        mat_row_mul(r10, r11, r12, cv1x, cv1y, cv1z),
+        mat_row_mul(r20, r21, r22, cv1x, cv1y, cv1z),
+        mat_row_mul(r00, r01, r02, cv2x, cv2y, cv2z),
+        mat_row_mul(r10, r11, r12, cv2x, cv2y, cv2z),
+        mat_row_mul(r20, r21, r22, cv2x, cv2y, cv2z),
+        mat_row_mul(r00, r01, r02, cur_nx, cur_ny, cur_nz),
+        mat_row_mul(r10, r11, r12, cur_nx, cur_ny, cur_nz),
+        mat_row_mul(r20, r21, r22, cur_nx, cur_ny, cur_nz)
+    };
+
+    always @(posedge clk) begin
+        if (upd_we)
+            updated_lut[idx] <= upd_wdata;
+        upd_rdata <= updated_lut[idx];
+    end
+
+    wire signed [8:0] cv0x, cv0y, cv0z;
+    wire signed [8:0] cv1x, cv1y, cv1z;
+    wire signed [8:0] cv2x, cv2y, cv2z;
+    wire signed [8:0] cur_nx, cur_ny, cur_nz;
+    assign {cv0x, cv0y, cv0z, cv1x, cv1y, cv1z, cv2x, cv2y, cv2z, cur_nx, cur_ny, cur_nz} = upd_rdata;
+
+    wire signed [10:0] sum_x = cv0x + cv1x + cv2x;
+    wire signed [10:0] sum_y = cv0y + cv1y + cv2y;
+    wire signed [10:0] sum_z = cv0z + cv1z + cv2z;
+    wire signed [18:0] div3_x = sum_x * 19'sd85;
+    wire signed [18:0] div3_y = sum_y * 19'sd85;
+    wire signed [18:0] div3_z = sum_z * 19'sd85;
+    wire signed [8:0]  mid_x = div3_x[16:8];
+    wire signed [8:0]  mid_y = div3_y[16:8];
+    wire signed [8:0]  mid_z = div3_z[16:8];
+
+    wire signed [11:0] dx = LIGHT_X - mid_x;
+    wire signed [11:0] dy = LIGHT_Y - mid_y;
+    wire signed [11:0] dz = LIGHT_Z - mid_z;
 
     wire signed [19:0] dot_x   = cur_nx * dx;
     wire signed [19:0] dot_y   = cur_ny * dy;
@@ -109,21 +159,66 @@ module renderer #(
         (dot_val >= 22'sd32768) ? MAX_BRIGHT :
                                   (MIN_BRIGHT + bright_scaled[22:15]);
 
-    wire signed [10:0] screen_x = 11'sd320 + cur_px;
-    wire signed [10:0] screen_y = 11'sd240 + cur_pz;
+    wire signed [10:0] sx0 = 11'sd320 + cv0x;
+    wire signed [10:0] sy0 = 11'sd240 + cv0z;
+    wire signed [10:0] sx1 = 11'sd320 + cv1x;
+    wire signed [10:0] sy1 = 11'sd240 + cv1z;
+    wire signed [10:0] sx2 = 11'sd320 + cv2x;
+    wire signed [10:0] sy2 = 11'sd240 + cv2z;
+
+    wire signed [10:0] min_x01 = (sx0 < sx1) ? sx0 : sx1;
+    wire signed [10:0] min_x   = (min_x01 < sx2) ? min_x01 : sx2;
+    wire signed [10:0] max_x01 = (sx0 > sx1) ? sx0 : sx1;
+    wire signed [10:0] max_x   = (max_x01 > sx2) ? max_x01 : sx2;
+
+    wire signed [10:0] min_y01 = (sy0 < sy1) ? sy0 : sy1;
+    wire signed [10:0] min_y   = (min_y01 < sy2) ? min_y01 : sy2;
+    wire signed [10:0] max_y01 = (sy0 > sy1) ? sy0 : sy1;
+    wire signed [10:0] max_y   = (max_y01 > sy2) ? max_y01 : sy2;
+
+    reg signed [10:0] scan_x, scan_y;
+    reg signed [10:0] box_min_x, box_max_x, box_max_y;
+    reg [7:0]         tri_bright;
+
+    wire signed [10:0] d10x = sx1 - sx0;
+    wire signed [10:0] d10y = sy1 - sy0;
+    wire signed [10:0] d21x = sx2 - sx1;
+    wire signed [10:0] d21y = sy2 - sy1;
+    wire signed [10:0] d02x = sx0 - sx2;
+    wire signed [10:0] d02y = sy0 - sy2;
+
+    wire signed [10:0] p0x = scan_x - sx0;
+    wire signed [10:0] p0y = scan_y - sy0;
+    wire signed [10:0] p1x = scan_x - sx1;
+    wire signed [10:0] p1y = scan_y - sy1;
+    wire signed [10:0] p2x = scan_x - sx2;
+    wire signed [10:0] p2y = scan_y - sy2;
+
+    wire signed [21:0] e0 = (d10x * p0y) - (d10y * p0x);
+    wire signed [21:0] e1 = (d21x * p1y) - (d21y * p1x);
+    wire signed [21:0] e2 = (d02x * p2y) - (d02y * p2x);
+
+    wire inside_tri = ((e0 >= 22'sd0) && (e1 >= 22'sd0) && (e2 >= 22'sd0)) ||
+                      ((e0 <= 22'sd0) && (e1 <= 22'sd0) && (e2 <= 22'sd0));
 
     always @(posedge clk) begin
         if (!resetn) begin
             state         <= S_IDLE;
-            sub           <= 1'b0;
-            idx           <= 11'd0;
+            sub           <= 2'd0;
+            idx           <= 8'd0;
             clear_x       <= 10'd0;
             clear_y       <= 9'd0;
             screen_dirty  <= 1'b0;
             prev_enable   <= 1'b0;
             prev_shape_id <= 4'd0;
-            prev_angle_x  <= 9'd0;
-            prev_angle_z  <= 9'd0;
+            prev_rot_req  <= 1'b0;
+            load_base     <= 1'b0;
+            scan_x        <= 11'sd0;
+            scan_y        <= 11'sd0;
+            box_min_x     <= 11'sd0;
+            box_max_x     <= 11'sd0;
+            box_max_y     <= 11'sd0;
+            tri_bright    <= 8'd0;
             vga_x         <= 10'd0;
             vga_y         <= 9'd0;
             vga_color     <= 24'd0;
@@ -133,27 +228,26 @@ module renderer #(
             vga_write <= 1'b0;
 
             case (state)
-
                 S_IDLE: begin
                     if (vga_sync && need_update) begin
                         done          <= 1'b0;
                         prev_enable   <= shape_enable;
                         prev_shape_id <= shape_id;
-                        prev_angle_x  <= angle_x;
-                        prev_angle_z  <= angle_z;
+                        prev_rot_req  <= rot_req;
+                        load_base     <= shape_changed;
 
                         r00 <=  cz;
-                        r01 <= -(sz_cx >>> 14);
-                        r02 <=  (sz_sx >>> 14);
+                        r01 <= -$signed(sz_cx[29:14]);
+                        r02 <=  $signed(sz_sx[29:14]);
                         r10 <=  sz;
-                        r11 <=  (cz_cx >>> 14);
-                        r12 <= -(cz_sx >>> 14);
+                        r11 <=  $signed(cz_cx[29:14]);
+                        r12 <= -$signed(cz_sx[29:14]);
                         r20 <=  16'sd0;
                         r21 <=  sx;
                         r22 <=  cx;
 
-                        idx <= 11'd0;
-                        sub <= 1'b0;
+                        idx <= 8'd0;
+                        sub <= 2'd0;
 
                         if (shape_enable) begin
                             state <= S_MATRIX_MUL;
@@ -166,21 +260,12 @@ module renderer #(
                 end
 
                 S_MATRIX_MUL: begin
-                    if (!sub) begin
-                        sub <= 1'b1;
+                    if (sub == 2'd0) begin
+                        sub <= 2'd1;
                     end else begin
-                        updated_lut[idx] <= {
-                            mat_row_mul(r00, r01, r02, base_px, base_py, base_pz),
-                            mat_row_mul(r10, r11, r12, base_px, base_py, base_pz),
-                            mat_row_mul(r20, r21, r22, base_px, base_py, base_pz),
-                            mat_row_mul(r00, r01, r02, base_nx, base_ny, base_nz),
-                            mat_row_mul(r10, r11, r12, base_nx, base_ny, base_nz),
-                            mat_row_mul(r20, r21, r22, base_nx, base_ny, base_nz)
-                        };
-                        sub <= 1'b0;
-
-                        if (idx == NUM_POINTS - 1) begin
-                            idx <= 11'd0;
+                        sub <= 2'd0;
+                        if (idx + 8'd1 >= num_tris) begin
+                            idx <= 8'd0;
                             if (screen_dirty) begin
                                 clear_x <= 10'd0;
                                 clear_y <= 9'd0;
@@ -189,7 +274,7 @@ module renderer #(
                                 state   <= S_RENDER;
                             end
                         end else begin
-                            idx <= idx + 11'd1;
+                            idx <= idx + 8'd1;
                         end
                     end
                 end
@@ -207,8 +292,8 @@ module renderer #(
                         clear_y <= clear_y + 9'd1;
                     end else begin
                         screen_dirty <= 1'b0;
-                        idx          <= 11'd0;
-                        sub          <= 1'b0;
+                        idx          <= 8'd0;
+                        sub          <= 2'd0;
                         if (prev_enable)
                             state <= S_RENDER;
                         else begin
@@ -219,28 +304,58 @@ module renderer #(
                 end
 
                 S_RENDER: begin
-                    if (!sub) begin
-
-                        {cur_px, cur_py, cur_pz, cur_nx, cur_ny, cur_nz} <= updated_lut[idx];
-                        sub <= 1'b1;
-                    end else begin
-
-                        if (cur_ny > 9'sd0) begin
-                            vga_x        <= screen_x[9:0];
-                            vga_y        <= screen_y[8:0];
-                            vga_color    <= {brightness, brightness, brightness};
-                            vga_write    <= 1'b1;
-                            screen_dirty <= 1'b1;
+                    case (sub)
+                        2'd0: begin
+                            sub <= 2'd1;
                         end
 
-                        sub <= 1'b0;
-                        if (idx == NUM_POINTS - 1) begin
-                            done  <= 1'b1;
-                            state <= S_IDLE;
-                        end else begin
-                            idx <= idx + 11'd1;
+                        2'd1: begin
+                            if (cur_ny > 9'sd0) begin
+                                scan_x     <= min_x;
+                                scan_y     <= min_y;
+                                box_min_x  <= min_x;
+                                box_max_x  <= max_x;
+                                box_max_y  <= max_y;
+                                tri_bright <= brightness;
+                                sub        <= 2'd2;
+                            end else begin
+                                sub <= 2'd0;
+                                if (idx + 8'd1 >= num_tris) begin
+                                    done  <= 1'b1;
+                                    state <= S_IDLE;
+                                end else begin
+                                    idx <= idx + 8'd1;
+                                end
+                            end
                         end
-                    end
+
+                        2'd2: begin
+                            if (inside_tri) begin
+                                vga_x        <= scan_x[9:0];
+                                vga_y        <= scan_y[8:0];
+                                vga_color    <= {tri_bright, tri_bright, tri_bright};
+                                vga_write    <= 1'b1;
+                                screen_dirty <= 1'b1;
+                            end
+
+                            if (scan_x < box_max_x) begin
+                                scan_x <= scan_x + 11'sd1;
+                            end else if (scan_y < box_max_y) begin
+                                scan_x <= box_min_x;
+                                scan_y <= scan_y + 11'sd1;
+                            end else begin
+                                sub <= 2'd0;
+                                if (idx + 8'd1 >= num_tris) begin
+                                    done  <= 1'b1;
+                                    state <= S_IDLE;
+                                end else begin
+                                    idx <= idx + 8'd1;
+                                end
+                            end
+                        end
+
+                        default: sub <= 2'd0;
+                    endcase
                 end
             endcase
         end

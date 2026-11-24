@@ -13,6 +13,10 @@ R0
 R1
 R0
 R1
+R0
+R1
+R0
+R1
 Z2 !s12c _opt1
 R1
 Z3 !s12c _opt2
@@ -102,10 +106,10 @@ R1
 cModel Technology
 Z4 dC:/Users/limue/Downloads/object/keyboard/ModelSim
 T_opt
-!s110 1795390130
-V?<nATRQ^amoaQzK[OeO@C3
+!s110 1795391673
+VLlR5;oAfSi^BHDG5lAn3m0
 04 16 4 work testbench_simple fast 0
-=1-54bf6471ce13-6b037aad-289-285c
+=1-54bf6471ce13-6b0380b4-34e-4180
 R1
 Z5 !s12b OEM100
 !s124 OEM10U11 
@@ -146,42 +150,42 @@ vinv_sqrt_lut
 !s100 j3?;o0`k4XRk6B`ganhMQ1
 Id^MFLQcoh>4z]VcnEDZen1
 Z9 dW:/3D-Rendering-Engine/ModelSim
-Z10 w1795388480
+w1795388480
 8..\inv_sqrt_lut.v
 F..\inv_sqrt_lut.v
-Z11 8testbench_simple.v
-Z12 Ftestbench_simple.v
+Z10 8testbench_simple.v
+Z11 Ftestbench_simple.v
 !i122 63
 L0 9 58
-Z13 VDg1SIo80bB@j0V0VzS_@n1
-Z14 OL;L;2023.3;77
+Z12 VDg1SIo80bB@j0V0VzS_@n1
+Z13 OL;L;2023.3;77
 r1
 !s85 0
 31
 !i113 0
-Z15 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z14 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
 R7
 vkeyboard
-Z16 2testbench_simple.v|..\top.v|..\renderer.v|..\shape_lut.v|..\sin_lut.v|..\object_lib\vga_adapter.v|..\object_lib\vga_address_translator.v|..\object_lib\vga_controller.v|..\object_lib\keyboard_v2.v
-Z17 !s110 1795390123
+Z15 2testbench_simple.v|..\top.v|..\renderer.v|..\shape_lut.v|..\sin_lut.v|..\object_lib\vga_adapter.v|..\object_lib\vga_address_translator.v|..\object_lib\vga_controller.v|..\object_lib\keyboard_v2.v
+Z16 !s110 1795391667
 !i10b 1
 !s100 dVAOXX:`O8YUoQ=ba14A71
 IaO^iB>L=_=65d@hKG0OC10
 R9
-R10
+Z17 w1795390886
 8..\object_lib\keyboard_v2.v
 F..\object_lib\keyboard_v2.v
+R10
 R11
-R12
-!i122 68
+!i122 73
 L0 10 153
+R12
 R13
-R14
 r1
 !s85 0
 31
 !i113 0
-R15
+R14
 R7
 vplatonic_lut
 Z18 2../vga_adapter.v|../vga_address_translator.v|../keyboard.v|../sin_lut.v|../platonic_lut.v|../platonic_renderer.v|../top.v|../tb/PS2_keyboard.v|testbench_figures.v|testbench_sw_shape.v|testbench_wasd_rot.v|testbench_point_light.v
@@ -195,8 +199,8 @@ w1795207903
 F../platonic_lut.v
 !i122 58
 L0 21 1420
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -215,8 +219,8 @@ w1795207978
 F../platonic_renderer.v
 !i122 58
 L0 47 1552
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -235,8 +239,8 @@ Z22 8../tb/PS2_keyboard.v
 Z23 F../tb/PS2_keyboard.v
 !i122 58
 L0 125 93
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -255,8 +259,8 @@ R22
 R23
 !i122 58
 L0 16 101
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -265,70 +269,70 @@ R20
 R7
 n@p@s2_keyboard
 vrenderer
+R15
 R16
-R17
 !i10b 1
-!s100 cmR]RKR][1G@LE[7MSbT=3
-Ik_nYRamN4G:EZ5f_3R=f31
+!s100 56CGX5iAeZ6HFaCz;36OT1
+I6PnXC1KY=I7NC14DB>g^12
 R9
-Z24 w1795390104
+w1795391636
 8..\renderer.v
 F..\renderer.v
+R10
 R11
+!i122 73
+L0 3 354
 R12
-!i122 68
-L0 3 246
 R13
-R14
 r1
 !s85 0
 31
 !i113 0
-R15
+R14
 R7
 vshape_lut
+R15
 R16
-R17
 !i10b 1
-!s100 DM];jR3a@97CVl?b^<gL>0
-I[::Fbd8?d^_;i=e<P3MkQ2
+!s100 dnWLW@MDcc08@AXICHmij2
+IcW;UaB3lVH7^AfR:GDAN80
 R9
-R24
+w1795391634
 8..\shape_lut.v
 F..\shape_lut.v
+R10
 R11
+!i122 73
+L0 3 55
 R12
-!i122 68
-L0 3 33
 R13
-R14
 r1
 !s85 0
 31
 !i113 0
-R15
+R14
 R7
 vsin_lut
+R15
 R16
-R17
 !i10b 1
 !s100 CTH?oS_MQ]jo1^Y02Hj1g1
 IQl46<^N:M18ADfoM>?0ck3
 R9
-R24
+R17
 8..\sin_lut.v
 F..\sin_lut.v
+R10
 R11
-R12
-!i122 68
+!i122 73
 L0 3 377
+R12
 R13
-R14
 r1
 !s85 0
 31
 !i113 0
-R15
+R14
 R7
 vtb_fpga_board
 23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_board_adapter.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_fpga_board.v
@@ -336,80 +340,80 @@ vtb_fpga_board
 !i10b 1
 !s100 EfG5VfV@BPmR^b;dlML?X3
 I>T<c`VnUIJ6<jYNOzC;O;3
-Z25 dC:/Users/limue/Downloads/object
+Z24 dC:/Users/limue/Downloads/object
 w1795102899
 8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_fpga_board.v
 FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_fpga_board.v
 !i122 50
 L0 4 81
-R13
-Z26 OL;L;2025.2;82
+R12
+Z25 OL;L;2025.2;82
 r1
 !s85 0
 31
 !i113 0
-Z27 o-work 3D_Rendering_Engine/ModelSim/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
-Z28 tCvgOpt 0 defaultOptions 1085333592
+Z26 o-work 3D_Rendering_Engine/ModelSim/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z27 tCvgOpt 0 defaultOptions 1085333592
 vtb_platonic_lut
 23D_Rendering_Engine/platonic_lut.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_lut.v
 !s110 1795099578
 !i10b 1
 !s100 bR35CE8jU7D?O[cLPhZ8H2
 IS@YzATYWn?j84S06Ad;Dz3
-R25
+R24
 w1795099577
 8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_lut.v
 FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_lut.v
 !i122 36
 L0 2 207
-R13
-R26
+R12
+R25
 r1
 !s85 0
 31
 !i113 0
+R26
 R27
-R28
 vtb_platonic_renderer
 23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_adapter/vga_adapter.v|3D_Rendering_Engine/vga_adapter/vga_address_translator.v|3D_Rendering_Engine/vga_adapter/vga_controller.v|3D_Rendering_Engine/tb/PS2_keyboard.v|3D_Rendering_Engine/ModelSim/testbench_v2.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_renderer.v
 !s110 1795101705
 !i10b 1
 !s100 M6:0`A_^c;n6=9hzBo[L:3
 Ii6<PQCMW2>`gfgKeUl50o3
-R25
+R24
 w1795100190
 8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_renderer.v
 FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_renderer.v
 !i122 47
 L0 4 90
-R13
-R26
+R12
+R25
 r1
 !s85 0
 31
 !i113 0
+R26
 R27
-R28
 vtb_top_vga
 23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_adapter/vga_adapter.v|3D_Rendering_Engine/vga_adapter/vga_address_translator.v|3D_Rendering_Engine/vga_adapter/vga_controller.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_top_vga.v
 !s110 1795102504
 !i10b 1
 !s100 [f0fbbaHFf?o9:f[GSR7P0
 IkSQBIkf@n>MhSMaJ:n`am3
-R25
+R24
 w1795102496
 8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_top_vga.v
 FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_top_vga.v
 !i122 48
 L0 4 48
-R13
-R26
+R12
+R25
 r1
 !s85 0
 31
 !i113 0
+R26
 R27
-R28
 vtestbench
 2../top.v|../keyboard.v|../vga_adapter/vga_adapter.v|../vga_adapter/vga_address_translator.v|../vga_adapter/vga_controller.v|../tb/PS2_keyboard.v|testbench.v
 !s110 1795098678
@@ -421,15 +425,15 @@ w1795098669
 8testbench.v
 Ftestbench.v
 !i122 29
-Z29 L0 3 92
-R13
-R26
+Z28 L0 3 92
+R12
+R25
 r1
 !s85 0
 31
 !i113 0
-R15
-R28
+R14
+R27
 vtestbench_figures
 2testbench_figures.v
 !s110 1795208273
@@ -442,8 +446,8 @@ w1795208252
 Ftestbench_figures.v
 !i122 59
 L0 3 274
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -462,8 +466,8 @@ w1795207112
 Ftestbench_point_light.v
 !i122 58
 L0 3 281
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -471,24 +475,24 @@ r1
 R20
 R7
 vtestbench_simple
+R15
 R16
-R17
 !i10b 1
-!s100 9[c1RQD=D9gkL_d0==a?;2
-ICNYVJ87oTV8V[XjGG_m6g1
+!s100 ]iP20gki3<z:=kSMl^UO11
+I8>AlKFa:dHD2W2z2M1_cN0
 R9
+R17
 R10
 R11
-R12
-!i122 68
+!i122 73
 L0 4 143
+R12
 R13
-R14
 r1
 !s85 0
 31
 !i113 0
-R15
+R14
 R7
 vtestbench_sw_shape
 R18
@@ -502,8 +506,8 @@ w1795199234
 Ftestbench_sw_shape.v
 !i122 58
 L0 3 261
+R12
 R13
-R14
 r1
 !s85 0
 31
@@ -511,4 +515,4 @@ r1
 R20
 R7
 vtestbench_v2
-23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_adapter/vga_adapter.v|3D_Rendering_Engine/vga_adapter/vga_address_translator.v|3D_Rendering_Engine/vga_adapter
+23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_adapter/vga_adapter.v|3D_Rendering_Engine/vga_adapter/vga_address_translator.v|3D_Rend

@@ -1,10 +1,9 @@
 `default_nettype none
 
 module top #(
-    parameter [21:0] KEY_DELAY_CYCLES = 22'd2500000,
-    parameter [8:0]  ROT_STEP_DEG     = 9'd5,
-    parameter [8:0]  DEFAULT_ANGLE_X  = 9'd30,
-    parameter [8:0]  DEFAULT_ANGLE_Z  = 9'd35
+    parameter [21:0]        KEY_DELAY_CYCLES = 22'd2500000,
+    parameter signed [15:0] SIN_DELTA        = 16'sd1428,
+    parameter signed [15:0] COS_DELTA        = 16'sd16322
 ) (
     input  wire       CLOCK_50,
     input  wire [9:0] SW,
@@ -46,28 +45,35 @@ module top #(
         .wasd_held  (wasd_held)
     );
 
-    reg [21:0] key_cnt;
-    reg [8:0]  angle_x;
-    reg [8:0]  angle_z;
+    reg [21:0]       key_cnt;
+    reg              rot_req;
+    reg signed [1:0] rot_x;
+    reg signed [1:0] rot_z;
 
     always @(posedge CLOCK_50) begin
         if (!Resetn) begin
             key_cnt <= 22'd0;
-            angle_x <= DEFAULT_ANGLE_X;
-            angle_z <= DEFAULT_ANGLE_Z;
+            rot_req <= 1'b0;
+            rot_x   <= 2'sd0;
+            rot_z   <= 2'sd0;
         end else if (wasd_held != 4'b0000) begin
             if (key_cnt == KEY_DELAY_CYCLES - 22'd1) begin
                 key_cnt <= 22'd0;
+                rot_req <= ~rot_req;
 
                 if (wasd_held[3] && !wasd_held[1])
-                    angle_x <= (angle_x < ROT_STEP_DEG) ? (angle_x + 9'd360 - ROT_STEP_DEG) : (angle_x - ROT_STEP_DEG);
+                    rot_x <= -2'sd1;
                 else if (wasd_held[1] && !wasd_held[3])
-                    angle_x <= (angle_x + ROT_STEP_DEG >= 9'd360) ? (angle_x + ROT_STEP_DEG - 9'd360) : (angle_x + ROT_STEP_DEG);
+                    rot_x <= 2'sd1;
+                else
+                    rot_x <= 2'sd0;
 
                 if (wasd_held[2] && !wasd_held[0])
-                    angle_z <= (angle_z + ROT_STEP_DEG >= 9'd360) ? (angle_z + ROT_STEP_DEG - 9'd360) : (angle_z + ROT_STEP_DEG);
+                    rot_z <= 2'sd1;
                 else if (wasd_held[0] && !wasd_held[2])
-                    angle_z <= (angle_z < ROT_STEP_DEG) ? (angle_z + 9'd360 - ROT_STEP_DEG) : (angle_z - ROT_STEP_DEG);
+                    rot_z <= -2'sd1;
+                else
+                    rot_z <= 2'sd0;
             end else begin
                 key_cnt <= key_cnt + 22'd1;
             end
@@ -97,11 +103,7 @@ module top #(
                 10'b00100_00000: begin shape_enable <= 1'b1; shape_id <= 4'd2; end
                 10'b01000_00000: begin shape_enable <= 1'b1; shape_id <= 4'd3; end
                 10'b10000_00000: begin shape_enable <= 1'b1; shape_id <= 4'd4; end
-                10'b00000_10000: begin shape_enable <= 1'b1; shape_id <= 4'd5; end
-                10'b00000_01000: begin shape_enable <= 1'b1; shape_id <= 4'd6; end
-                10'b00000_00100: begin shape_enable <= 1'b1; shape_id <= 4'd7; end
-                10'b00000_00010: begin shape_enable <= 1'b1; shape_id <= 4'd8; end
-                10'b00000_00001: begin shape_enable <= 1'b1; shape_id <= 4'd9; end
+                10'b00000_01000: begin shape_enable <= 1'b1; shape_id <= 4'd5; end
                 default: ;
             endcase
         end
@@ -114,14 +116,18 @@ module top #(
     wire        render_done;
     wire        VGA_SYNC;
 
-    renderer RENDERER (
+    renderer #(
+        .SIN_DELTA (SIN_DELTA),
+        .COS_DELTA (COS_DELTA)
+    ) RENDERER (
         .clk          (CLOCK_50),
         .resetn       (Resetn),
         .vga_sync     (VGA_SYNC),
         .shape_enable (shape_enable),
         .shape_id     (shape_id),
-        .angle_x      (angle_x),
-        .angle_z      (angle_z),
+        .rot_req      (rot_req),
+        .rot_x        (rot_x),
+        .rot_z        (rot_z),
         .vga_x        (vga_x),
         .vga_y        (vga_y),
         .vga_color    (vga_color),
