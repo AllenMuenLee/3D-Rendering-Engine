@@ -142,7 +142,7 @@ module renderer #(
     wire signed [19:0] dot_x   = cur_nx * dx;
     wire signed [19:0] dot_y   = cur_ny * dy;
     wire signed [19:0] dot_z   = cur_nz * dz;
-    wire signed [21:0] dot_val = dot_x + dot_y + dot_z;
+    wire signed [21:0] dot_val = 22'h3FFFFF - dot_x + dot_y + dot_z;
 
     wire [22:0] bright_scaled = dot_val[14:0] * (MAX_BRIGHT - MIN_BRIGHT);
     wire [7:0]  brightness =
