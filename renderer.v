@@ -8,7 +8,7 @@ module renderer #(
     parameter signed [10:0] LIGHT_Y    = 11'sd256,
     parameter signed [10:0] LIGHT_Z    = -11'sd128,
     parameter [7:0]         MIN_BRIGHT = 8'd26,
-    parameter [7:0]         MAX_BRIGHT = 8'd230,
+    parameter [7:0]         MAX_BRIGHT = 8'd255,
 `ifdef DESIM
     parameter               LUT_FILE   = "../shape_lut.hex"
 `else
@@ -38,6 +38,8 @@ module renderer #(
     reg [1:0] state;
     reg [1:0] sub;
     reg [7:0] idx;
+    reg [9:0] clear_x;
+    reg [8:0] clear_y;
     reg       screen_dirty;
 
     reg       prev_enable;
@@ -142,13 +144,26 @@ module renderer #(
     wire signed [19:0] dot_x   = cur_nx * dx;
     wire signed [19:0] dot_y   = cur_ny * dy;
     wire signed [19:0] dot_z   = cur_nz * dz;
-    wire signed [21:0] dot_val = 22'h3FFFFF - dot_x + dot_y + dot_z;
+    wire signed [21:0] dot_val = dot_x + dot_y + dot_z;
+    wire signed [47:0] dx2_s = dx * dx;
+    wire signed [47:0] dy2_s = dy * dy;
+    wire signed [47:0] dz2_s = dz * dz;
+    wire [24:0] dist_sq = {1'b0, dx2_s[47:25]} +
+                          {1'b0, dy2_s[47:25]} +
+                          {1'b0, dz2_s[47:25]};
 
-    wire [22:0] bright_scaled = dot_val[14:0] * (MAX_BRIGHT - MIN_BRIGHT);
-    wire [7:0]  brightness =
-        (dot_val <= 22'sd0)     ? MIN_BRIGHT :
-        (dot_val >= 22'sd32768) ? MAX_BRIGHT :
-                                  (MIN_BRIGHT + bright_scaled[22:15]);
+    wire [9:0] dist_idx = (dist_sq[24:15] == 10'd0) ? 10'd1 : dist_sq[24:15];
+
+    wire [16:0] dot_clamped =
+        (dot_val <= 22'sd0)     ? 17'd0 :
+        (dot_val >= 22'sd32768) ? 17'd32768 :
+                                  dot_val[16:0];
+
+    wire [32:0] num_scaled = dot_clamped * (MAX_BRIGHT - MIN_BRIGHT) * 10'd16;
+    wire [32:0] atten_prod = num_scaled / dist_idx;
+
+    wire [7:0] brightness_raw = MIN_BRIGHT + atten_prod[26:19];
+    wire [7:0] brightness = (brightness_raw > MAX_BRIGHT) ? MAX_BRIGHT : brightness_raw;
 
     wire signed [8:0] min_x01 = (cv0x < cv1x) ? cv0x : cv1x;
     wire signed [8:0] min_x   = (min_x01 < cv2x) ? min_x01 : cv2x;
@@ -203,6 +218,8 @@ module renderer #(
             vga_y         <= 9'd0;
             vga_color     <= 24'd0;
             vga_write     <= 1'b0;
+            clear_x       <= 10'd0;
+            clear_y       <= 9'd0;
             done          <= 1'b0;
         end else begin
             vga_write <= 1'b0;
@@ -212,6 +229,7 @@ module renderer #(
                     if (vga_sync && need_update) begin
                         done          <= 1'b0;
                         prev_enable   <= shape_enable;
+                        prev_shape_id <= shape_id;
                         next_shape_id <= shape_id;
                         prev_rot_req  <= rot_req;
                         load_base     <= shape_changed;
@@ -226,15 +244,16 @@ module renderer #(
                         r21 <=  sx;
                         r22 <=  cx;
 
-                        idx <= 8'd0;
-                        sub <= 2'd0;
+                        idx     <= 8'd0;
+                        sub     <= 2'd0;
+                        clear_x <= 10'd0;
+                        clear_y <= 9'd0;
 
                         if (screen_dirty) begin
                             state <= S_CLEAR;
                         end else begin
-                            prev_shape_id <= shape_id;
                             if (shape_enable)
-                                state <= S_MATRIX_MUL;
+                                state <= S_CLEAR;
                             else
                                 done  <= 1'b1;
                         end
@@ -256,70 +275,29 @@ module renderer #(
                 end
 
                 S_CLEAR: begin
-                    case (sub)
-                        2'd0: begin
-                            sub <= 2'd1;
+                    vga_x     <= clear_x;
+                    vga_y     <= clear_y;
+                    vga_color <= 24'd0;
+                    vga_write <= 1'b1;
+
+                    if (clear_x < 10'd639) begin
+                        clear_x <= clear_x + 10'd1;
+                    end else if (clear_y < 9'd479) begin
+                        clear_x <= 10'd0;
+                        clear_y <= clear_y + 9'd1;
+                    end else begin
+                        clear_x      <= 10'd0;
+                        clear_y      <= 9'd0;
+                        screen_dirty <= 1'b0;
+                        idx          <= 8'd0;
+                        sub          <= 2'd0;
+                        if (prev_enable)
+                            state <= S_MATRIX_MUL;
+                        else begin
+                            done  <= 1'b1;
+                            state <= S_IDLE;
                         end
-
-                        2'd1: begin
-                            if (cur_ny > 9'sd0) begin
-                                scan_x    <= min_x;
-                                scan_y    <= min_y;
-                                box_min_x <= min_x;
-                                box_max_x <= max_x;
-                                box_max_y <= max_y;
-                                sub       <= 2'd2;
-                            end else begin
-                                sub <= 2'd0;
-                                if (idx + 8'd1 >= num_tris) begin
-                                    idx           <= 8'd0;
-                                    screen_dirty  <= 1'b0;
-                                    prev_shape_id <= next_shape_id;
-                                    if (prev_enable)
-                                        state <= S_MATRIX_MUL;
-                                    else begin
-                                        done  <= 1'b1;
-                                        state <= S_IDLE;
-                                    end
-                                end else begin
-                                    idx <= idx + 8'd1;
-                                end
-                            end
-                        end
-
-                        2'd2: begin
-                            if (inside_tri) begin
-                                vga_x     <= scan_x[9:0];
-                                vga_y     <= scan_y[8:0];
-                                vga_color <= 24'd0;
-                                vga_write <= 1'b1;
-                            end
-
-                            if (scan_x < box_max_x) begin
-                                scan_x <= scan_x + 11'sd1;
-                            end else if (scan_y < box_max_y) begin
-                                scan_x <= box_min_x;
-                                scan_y <= scan_y + 11'sd1;
-                            end else begin
-                                sub <= 2'd0;
-                                if (idx + 8'd1 >= num_tris) begin
-                                    idx           <= 8'd0;
-                                    screen_dirty  <= 1'b0;
-                                    prev_shape_id <= next_shape_id;
-                                    if (prev_enable)
-                                        state <= S_MATRIX_MUL;
-                                    else begin
-                                        done  <= 1'b1;
-                                        state <= S_IDLE;
-                                    end
-                                end else begin
-                                    idx <= idx + 8'd1;
-                                end
-                            end
-                        end
-
-                        default: sub <= 2'd0;
-                    endcase
+                    end
                 end
 
                 S_RENDER: begin
