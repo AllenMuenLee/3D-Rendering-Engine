@@ -38,12 +38,11 @@ module renderer #(
     reg [1:0] state;
     reg [1:0] sub;
     reg [7:0] idx;
-    reg [9:0] clear_x;
-    reg [8:0] clear_y;
     reg       screen_dirty;
 
     reg       prev_enable;
     reg [3:0] prev_shape_id;
+    reg [3:0] next_shape_id;
     reg       prev_rot_req;
     reg       load_base;
 
@@ -206,11 +205,10 @@ module renderer #(
             state         <= S_IDLE;
             sub           <= 2'd0;
             idx           <= 8'd0;
-            clear_x       <= 10'd0;
-            clear_y       <= 9'd0;
             screen_dirty  <= 1'b0;
             prev_enable   <= 1'b0;
             prev_shape_id <= 4'd0;
+            next_shape_id <= 4'd0;
             prev_rot_req  <= 1'b0;
             load_base     <= 1'b0;
             scan_x        <= 11'sd0;
@@ -232,7 +230,7 @@ module renderer #(
                     if (vga_sync && need_update) begin
                         done          <= 1'b0;
                         prev_enable   <= shape_enable;
-                        prev_shape_id <= shape_id;
+                        next_shape_id <= shape_id;
                         prev_rot_req  <= rot_req;
                         load_base     <= shape_changed;
 
@@ -249,12 +247,14 @@ module renderer #(
                         idx <= 8'd0;
                         sub <= 2'd0;
 
-                        if (shape_enable) begin
-                            state <= S_MATRIX_MUL;
-                        end else if (screen_dirty) begin
-                            clear_x <= 10'd0;
-                            clear_y <= 9'd0;
-                            state   <= S_CLEAR;
+                        if (screen_dirty) begin
+                            state <= S_CLEAR;
+                        end else begin
+                            prev_shape_id <= shape_id;
+                            if (shape_enable)
+                                state <= S_MATRIX_MUL;
+                            else
+                                done  <= 1'b1;
                         end
                     end
                 end
@@ -265,14 +265,8 @@ module renderer #(
                     end else begin
                         sub <= 2'd0;
                         if (idx + 8'd1 >= num_tris) begin
-                            idx <= 8'd0;
-                            if (screen_dirty) begin
-                                clear_x <= 10'd0;
-                                clear_y <= 9'd0;
-                                state   <= S_CLEAR;
-                            end else begin
-                                state   <= S_RENDER;
-                            end
+                            idx   <= 8'd0;
+                            state <= S_RENDER;
                         end else begin
                             idx <= idx + 8'd1;
                         end
@@ -280,27 +274,70 @@ module renderer #(
                 end
 
                 S_CLEAR: begin
-                    vga_x     <= clear_x;
-                    vga_y     <= clear_y;
-                    vga_color <= 24'd0;
-                    vga_write <= 1'b1;
-
-                    if (clear_x < 10'd639) begin
-                        clear_x <= clear_x + 10'd1;
-                    end else if (clear_y < 9'd479) begin
-                        clear_x <= 10'd0;
-                        clear_y <= clear_y + 9'd1;
-                    end else begin
-                        screen_dirty <= 1'b0;
-                        idx          <= 8'd0;
-                        sub          <= 2'd0;
-                        if (prev_enable)
-                            state <= S_RENDER;
-                        else begin
-                            done  <= 1'b1;
-                            state <= S_IDLE;
+                    case (sub)
+                        2'd0: begin
+                            sub <= 2'd1;
                         end
-                    end
+
+                        2'd1: begin
+                            if (cur_ny > 9'sd0) begin
+                                scan_x    <= min_x;
+                                scan_y    <= min_y;
+                                box_min_x <= min_x;
+                                box_max_x <= max_x;
+                                box_max_y <= max_y;
+                                sub       <= 2'd2;
+                            end else begin
+                                sub <= 2'd0;
+                                if (idx + 8'd1 >= num_tris) begin
+                                    idx           <= 8'd0;
+                                    screen_dirty  <= 1'b0;
+                                    prev_shape_id <= next_shape_id;
+                                    if (prev_enable)
+                                        state <= S_MATRIX_MUL;
+                                    else begin
+                                        done  <= 1'b1;
+                                        state <= S_IDLE;
+                                    end
+                                end else begin
+                                    idx <= idx + 8'd1;
+                                end
+                            end
+                        end
+
+                        2'd2: begin
+                            if (inside_tri) begin
+                                vga_x     <= scan_x[9:0];
+                                vga_y     <= scan_y[8:0];
+                                vga_color <= 24'd0;
+                                vga_write <= 1'b1;
+                            end
+
+                            if (scan_x < box_max_x) begin
+                                scan_x <= scan_x + 11'sd1;
+                            end else if (scan_y < box_max_y) begin
+                                scan_x <= box_min_x;
+                                scan_y <= scan_y + 11'sd1;
+                            end else begin
+                                sub <= 2'd0;
+                                if (idx + 8'd1 >= num_tris) begin
+                                    idx           <= 8'd0;
+                                    screen_dirty  <= 1'b0;
+                                    prev_shape_id <= next_shape_id;
+                                    if (prev_enable)
+                                        state <= S_MATRIX_MUL;
+                                    else begin
+                                        done  <= 1'b1;
+                                        state <= S_IDLE;
+                                    end
+                                end else begin
+                                    idx <= idx + 8'd1;
+                                end
+                            end
+                        end
+
+                        default: sub <= 2'd0;
+                    endcase
                 end
 
                 S_RENDER: begin

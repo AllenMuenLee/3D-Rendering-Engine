@@ -1,0 +1,507 @@
+m255
+K4
+z2
+Z0 !s12c _opt2
+Z1 !s99 nomlopt
+R0
+R1
+R0
+R1
+R0
+R1
+Z2 !s12c _opt
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+Z3 !s12c _opt1
+R1
+R0
+R1
+R2
+R1
+R3
+R1
+R0
+R1
+R0
+R1
+R2
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R0
+R1
+!s11f MIXED_VERSIONS
+R3
+R1
+R2
+R1
+R2
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R3
+R1
+R2
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R0
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R0
+R1
+R3
+R1
+R2
+R1
+R3
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+R2
+R1
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z4 dC:/Users/limue/Downloads/object/keyboard/ModelSim
+T_opt
+!s110 1795391673
+VLlR5;oAfSi^BHDG5lAn3m0
+Z5 04 16 4 work testbench_simple fast 0
+=1-54bf6471ce13-6b0380b4-34e-4180
+R1
+Z6 !s12b OEM100
+!s124 OEM10U11 
+Z7 o-quiet -auto_acc_if_foreign -work work
+Z8 tCvgOpt 0
+n@_opt
+Z9 OL;O;2023.3;77
+R4
+T_opt1
+!s110 1795208202
+VAXT_9O^jKf7?7W;T=V[fj0
+04 21 4 work testbench_point_light fast 0
+=1-54bf6471ce13-6b00b408-305-11a4
+R1
+R6
+!s124 OEM10U15 
+R7
+R8
+n@_opt1
+R9
+R4
+T_opt2
+!s110 1795556733
+V5HTTj7T_AgACo0gl`83ez2
+R5
+=1-54bf647201c6-6b060576-2a8-3110
+R1
+R6
+!s124 OEM10U7 
+o-quiet -auto_acc_if_foreign -work work -Lf 220model -Lf altera_mf_ver -Lf verilog
+R8
+n@_opt2
+R9
+vinv_sqrt_lut
+2testbench_simple.v|..\top.v|..\renderer.v|..\shape_lut.v|..\sin_lut.v|..\inv_sqrt_lut.v|..\object_lib\vga_adapter.v|..\object_lib\vga_address_translator.v|..\object_lib\vga_controller.v|..\object_lib\keyboard_v2.v
+!s110 1795388912
+!i10b 1
+!s100 j3?;o0`k4XRk6B`ganhMQ1
+Id^MFLQcoh>4z]VcnEDZen1
+Z10 dW:/3D-Rendering-Engine/ModelSim
+w1795388480
+8..\inv_sqrt_lut.v
+F..\inv_sqrt_lut.v
+Z11 8testbench_simple.v
+Z12 Ftestbench_simple.v
+!i122 63
+L0 9 58
+Z13 VDg1SIo80bB@j0V0VzS_@n1
+Z14 OL;L;2023.3;77
+r1
+!s85 0
+31
+!i113 0
+Z15 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R8
+vkeyboard
+Z16 2../renderer.v|../shape_lut.v|../top.v|../vga_board_adapter.v|../object_lib/keyboard.v|../object_lib/vga_adapter.v|../object_lib/vga_address_translator.v|../object_lib/vga_controller.v|testbench_simple.v
+Z17 !s110 1795556723
+!i10b 1
+!s100 3j60U;9bfzfJ18l@>gmzh1
+IZV=V6?bmhT6AYPTd<ViaJ2
+Z18 d//vsrv1/B.Homes$$/leemuen/Documents/3D-Rendering-Engine/ModelSim
+w1795200259
+8../object_lib/keyboard.v
+F../object_lib/keyboard.v
+!i122 77
+L0 9 163
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R15
+R8
+vplatonic_lut
+Z19 2../vga_adapter.v|../vga_address_translator.v|../keyboard.v|../sin_lut.v|../platonic_lut.v|../platonic_renderer.v|../top.v|../tb/PS2_keyboard.v|testbench_figures.v|testbench_sw_shape.v|testbench_wasd_rot.v|testbench_point_light.v
+Z20 !s110 1795208042
+!i10b 1
+!s100 fbOHGU88VRHd_7Mh@5MMJ1
+IcWF^XM]9mV=g:F3;2RXjH0
+R10
+w1795207903
+8../platonic_lut.v
+F../platonic_lut.v
+!i122 58
+L0 21 1420
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+Z21 o-work work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R8
+vplatonic_renderer
+R19
+R20
+!i10b 1
+!s100 2Pn;lQ>aKeo1dfW=DJeAj3
+ICWII?iP@D>56dYZ1=V6e23
+R10
+w1795207978
+8../platonic_renderer.v
+F../platonic_renderer.v
+!i122 58
+L0 47 1552
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R21
+R8
+vps2_clk_dat
+R19
+R20
+!i10b 1
+!s100 2d9ZUC4<:[E=nLi8MVD1b1
+I:;ONT63mY@Jh;a53WHloB1
+R10
+Z22 w1795103119
+Z23 8../tb/PS2_keyboard.v
+Z24 F../tb/PS2_keyboard.v
+!i122 58
+L0 125 93
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R21
+R8
+vPS2_keyboard
+R19
+R20
+!i10b 1
+!s100 V^fgVZeiS:[0Tn4`eH<VD1
+IOiW`0mH`j[dcE=]S:=IOI0
+R10
+R22
+R23
+R24
+!i122 58
+L0 16 101
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R21
+R8
+n@p@s2_keyboard
+vrenderer
+R16
+R17
+!i10b 1
+!s100 R_=`dPW54f]8<j^ZhCdnE3
+IGHBgR1][mWgMhQPVEa2OI3
+R18
+w1795556718
+8../renderer.v
+F../renderer.v
+!i122 77
+L0 3 398
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R15
+R8
+vshape_lut
+R16
+R17
+!i10b 1
+!s100 adC64<Z>EB45gdfQfZInS3
+IH]bUQhc1LS4blC_KC6KiT3
+R18
+w1795391634
+8../shape_lut.v
+F../shape_lut.v
+!i122 77
+L0 3 55
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R15
+R8
+vsin_lut
+2testbench_simple.v|..\top.v|..\renderer.v|..\shape_lut.v|..\sin_lut.v|..\object_lib\vga_adapter.v|..\object_lib\vga_address_translator.v|..\object_lib\vga_controller.v|..\object_lib\keyboard_v2.v
+!s110 1795391667
+!i10b 1
+!s100 CTH?oS_MQ]jo1^Y02Hj1g1
+IQl46<^N:M18ADfoM>?0ck3
+R10
+w1795390886
+8..\sin_lut.v
+F..\sin_lut.v
+R11
+R12
+!i122 73
+L0 3 377
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R15
+R8
+vtb_fpga_board
+23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_board_adapter.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_fpga_board.v
+!s110 1795102901
+!i10b 1
+!s100 EfG5VfV@BPmR^b;dlML?X3
+I>T<c`VnUIJ6<jYNOzC;O;3
+Z25 dC:/Users/limue/Downloads/object
+w1795102899
+8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_fpga_board.v
+FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_fpga_board.v
+!i122 50
+L0 4 81
+R13
+Z26 OL;L;2025.2;82
+r1
+!s85 0
+31
+!i113 0
+Z27 o-work 3D_Rendering_Engine/ModelSim/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z28 tCvgOpt 0 defaultOptions 1085333592
+vtb_platonic_lut
+23D_Rendering_Engine/platonic_lut.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_lut.v
+!s110 1795099578
+!i10b 1
+!s100 bR35CE8jU7D?O[cLPhZ8H2
+IS@YzATYWn?j84S06Ad;Dz3
+R25
+w1795099577
+8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_lut.v
+FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_lut.v
+!i122 36
+L0 2 207
+R13
+R26
+r1
+!s85 0
+31
+!i113 0
+R27
+R28
+vtb_platonic_renderer
+23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_adapter/vga_adapter.v|3D_Rendering_Engine/vga_adapter/vga_address_translator.v|3D_Rendering_Engine/vga_adapter/vga_controller.v|3D_Rendering_Engine/tb/PS2_keyboard.v|3D_Rendering_Engine/ModelSim/testbench_v2.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_renderer.v
+!s110 1795101705
+!i10b 1
+!s100 M6:0`A_^c;n6=9hzBo[L:3
+Ii6<PQCMW2>`gfgKeUl50o3
+R25
+w1795100190
+8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_renderer.v
+FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_platonic_renderer.v
+!i122 47
+L0 4 90
+R13
+R26
+r1
+!s85 0
+31
+!i113 0
+R27
+R28
+vtb_top_vga
+23D_Rendering_Engine/top.v|3D_Rendering_Engine/keyboard_v2.v|3D_Rendering_Engine/platonic_lut.v|3D_Rendering_Engine/platonic_renderer.v|3D_Rendering_Engine/vga_adapter/vga_adapter.v|3D_Rendering_Engine/vga_adapter/vga_address_translator.v|3D_Rendering_Engine/vga_adapter/vga_controller.v|C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_top_vga.v
+!s110 1795102504
+!i10b 1
+!s100 [f0fbbaHFf?o9:f[GSR7P0
+IkSQBIkf@n>MhSMaJ:n`am3
+R25
+w1795102496
+8C:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_top_vga.v
+FC:\Users\limue\.gemini\antigravity-cli\brain\97c0e884-0e7b-4dc0-90bc-9f4f63e6f52d\scratch\tb_top_vga.v
+!i122 48
+L0 4 48
+R13
+R26
+r1
+!s85 0
+31
+!i113 0
+R27
+R28
+vtestbench
+2../top.v|../keyboard.v|../vga_adapter/vga_adapter.v|../vga_adapter/vga_address_translator.v|../vga_adapter/vga_controller.v|../tb/PS2_keyboard.v|testbench.v
+!s110 1795098678
+!i10b 1
+!s100 ?@Hj0lMHCc5]n?@dF=Gz`2
+IAUZZnc<6TVHVBT?zEfS072
+dC:/Users/limue/Downloads/object/3D_Rendering_Engine/ModelSim
+w1795098669
+8testbench.v
+Ftestbench.v
+!i122 29
+Z29 L0 3 92
+R13
+R26
+r1
+!s85 0
+31
+!i113 0
+R15
+R28
+vtestbench_figures
+2testbench_figures.v
+!s110 1795208273
+!i10b 1
+!s100 U[0I@WZXnRD]:ZUATKVN;1
+IV^fdl6Ld_gbB^iI;;SL?k3
+R10
+w1795208252
+8testbench_figures.v
+Ftestbench_figures.v
+!i122 59
+L0 3 274
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R21
+R8
+vtestbench_point_light
+R19
+R20
+!i10b 1
+!s100 8Mk2HiJ_Xo>OlKoHA;2`01
+InL=WgjFon7Sd6F7cI^Pz@1
+R10
+w1795207112
+8testbench_point_light.v
+Ftestbench_point_light.v
+!i122 58
+L0 3 281
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R21
+R8
+vtestbench_simple
+R16
+R17
+!i10b 1
+!s100 `8@d=4MEU;KE3X56[7h1X0
+INF<fz8@>8=`2[8`^MYmIC3
+R18
+w1795554457
+R11
+R12
+!i122 77
+L0 4 158
+R13
+R14
+r1
+!s85 0
+31
+!i113 0
+R15
+R8
+vtestbench_sw_shape
+R19
+R20
+!i10b 1
+!s100 21<[NXIhzYQM;?86Ri[aE2
+ILmEDZeoLjQCFVizEob4^W2
+R10
+w1795199234
+8testbench_sw_s
