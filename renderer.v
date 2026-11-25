@@ -133,19 +133,11 @@ module renderer #(
     wire signed [8:0] cur_nx, cur_ny, cur_nz;
     assign {cv0x, cv0y, cv0z, cv1x, cv1y, cv1z, cv2x, cv2y, cv2z, cur_nx, cur_ny, cur_nz} = upd_rdata;
 
-    wire signed [10:0] sum_x = cv0x + cv1x + cv2x;
-    wire signed [10:0] sum_y = cv0y + cv1y + cv2y;
-    wire signed [10:0] sum_z = cv0z + cv1z + cv2z;
-    wire signed [18:0] div3_x = sum_x * 19'sd85;
-    wire signed [18:0] div3_y = sum_y * 19'sd85;
-    wire signed [18:0] div3_z = sum_z * 19'sd85;
-    wire signed [8:0]  mid_x = div3_x[16:8];
-    wire signed [8:0]  mid_y = div3_y[16:8];
-    wire signed [8:0]  mid_z = div3_z[16:8];
+    reg signed [10:0] scan_x, scan_y;
 
-    wire signed [11:0] dx = LIGHT_X - mid_x;
-    wire signed [11:0] dy = LIGHT_Y - mid_y;
-    wire signed [11:0] dz = LIGHT_Z - mid_z;
+    wire signed [11:0] dx = LIGHT_X - scan_x;
+    wire signed [11:0] dy = LIGHT_Y - cv0y;
+    wire signed [11:0] dz = LIGHT_Z - scan_y;
 
     wire signed [19:0] dot_x   = cur_nx * dx;
     wire signed [19:0] dot_y   = cur_ny * dy;
@@ -158,40 +150,31 @@ module renderer #(
         (dot_val >= 22'sd32768) ? MAX_BRIGHT :
                                   (MIN_BRIGHT + bright_scaled[22:15]);
 
-    wire signed [10:0] sx0 = 11'sd320 + cv0x;
-    wire signed [10:0] sy0 = 11'sd240 + cv0z;
-    wire signed [10:0] sx1 = 11'sd320 + cv1x;
-    wire signed [10:0] sy1 = 11'sd240 + cv1z;
-    wire signed [10:0] sx2 = 11'sd320 + cv2x;
-    wire signed [10:0] sy2 = 11'sd240 + cv2z;
+    wire signed [8:0] min_x01 = (cv0x < cv1x) ? cv0x : cv1x;
+    wire signed [8:0] min_x   = (min_x01 < cv2x) ? min_x01 : cv2x;
+    wire signed [8:0] max_x01 = (cv0x > cv1x) ? cv0x : cv1x;
+    wire signed [8:0] max_x   = (max_x01 > cv2x) ? max_x01 : cv2x;
 
-    wire signed [10:0] min_x01 = (sx0 < sx1) ? sx0 : sx1;
-    wire signed [10:0] min_x   = (min_x01 < sx2) ? min_x01 : sx2;
-    wire signed [10:0] max_x01 = (sx0 > sx1) ? sx0 : sx1;
-    wire signed [10:0] max_x   = (max_x01 > sx2) ? max_x01 : sx2;
+    wire signed [8:0] min_y01 = (cv0z < cv1z) ? cv0z : cv1z;
+    wire signed [8:0] min_y   = (min_y01 < cv2z) ? min_y01 : cv2z;
+    wire signed [8:0] max_y01 = (cv0z > cv1z) ? cv0z : cv1z;
+    wire signed [8:0] max_y   = (max_y01 > cv2z) ? max_y01 : cv2z;
 
-    wire signed [10:0] min_y01 = (sy0 < sy1) ? sy0 : sy1;
-    wire signed [10:0] min_y   = (min_y01 < sy2) ? min_y01 : sy2;
-    wire signed [10:0] max_y01 = (sy0 > sy1) ? sy0 : sy1;
-    wire signed [10:0] max_y   = (max_y01 > sy2) ? max_y01 : sy2;
-
-    reg signed [10:0] scan_x, scan_y;
     reg signed [10:0] box_min_x, box_max_x, box_max_y;
-    reg [7:0]         tri_bright;
 
-    wire signed [10:0] d10x = sx1 - sx0;
-    wire signed [10:0] d10y = sy1 - sy0;
-    wire signed [10:0] d21x = sx2 - sx1;
-    wire signed [10:0] d21y = sy2 - sy1;
-    wire signed [10:0] d02x = sx0 - sx2;
-    wire signed [10:0] d02y = sy0 - sy2;
+    wire signed [9:0] d10x = cv1x - cv0x;
+    wire signed [9:0] d10y = cv1z - cv0z;
+    wire signed [9:0] d21x = cv2x - cv1x;
+    wire signed [9:0] d21y = cv2z - cv1z;
+    wire signed [9:0] d02x = cv0x - cv2x;
+    wire signed [9:0] d02y = cv0z - cv2z;
 
-    wire signed [10:0] p0x = scan_x - sx0;
-    wire signed [10:0] p0y = scan_y - sy0;
-    wire signed [10:0] p1x = scan_x - sx1;
-    wire signed [10:0] p1y = scan_y - sy1;
-    wire signed [10:0] p2x = scan_x - sx2;
-    wire signed [10:0] p2y = scan_y - sy2;
+    wire signed [10:0] p0x = scan_x - cv0x;
+    wire signed [10:0] p0y = scan_y - cv0z;
+    wire signed [10:0] p1x = scan_x - cv1x;
+    wire signed [10:0] p1y = scan_y - cv1z;
+    wire signed [10:0] p2x = scan_x - cv2x;
+    wire signed [10:0] p2y = scan_y - cv2z;
 
     wire signed [21:0] e0 = (d10x * p0y) - (d10y * p0x);
     wire signed [21:0] e1 = (d21x * p1y) - (d21y * p1x);
@@ -216,7 +199,6 @@ module renderer #(
             box_min_x     <= 11'sd0;
             box_max_x     <= 11'sd0;
             box_max_y     <= 11'sd0;
-            tri_bright    <= 8'd0;
             vga_x         <= 10'd0;
             vga_y         <= 9'd0;
             vga_color     <= 24'd0;
@@ -353,7 +335,6 @@ module renderer #(
                                 box_min_x  <= min_x;
                                 box_max_x  <= max_x;
                                 box_max_y  <= max_y;
-                                tri_bright <= brightness;
                                 sub        <= 2'd2;
                             end else begin
                                 sub <= 2'd0;
@@ -368,9 +349,9 @@ module renderer #(
 
                         2'd2: begin
                             if (inside_tri) begin
-                                vga_x        <= scan_x[9:0];
-                                vga_y        <= scan_y[8:0];
-                                vga_color    <= {tri_bright, tri_bright, tri_bright};
+                                vga_x        <= 11'sd320 + scan_x;
+                                vga_y        <= 11'sd240 + scan_y;
+                                vga_color    <= {brightness, brightness, brightness};
                                 vga_write    <= 1'b1;
                                 screen_dirty <= 1'b1;
                             end
